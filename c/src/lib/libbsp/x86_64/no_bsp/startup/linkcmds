@@ -151,7 +151,6 @@ SECTIONS
   .data.rel.ro : { *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*) *(.data.rel.ro* .gnu.linkonce.d.rel.ro.*) }
   .dynamic        : { *(.dynamic) }
   .got            : { *(.got) }
-  . = DATA_SEGMENT_RELRO_END (24, .);
   .data           :
   {
     *(.data .data.* .gnu.linkonce.d.*)
@@ -178,7 +177,6 @@ SECTIONS
   _end = .; PROVIDE (end = .);
   . = ALIGN(0x10);
   WorkAreaBase = .;
-  . = DATA_SEGMENT_END (.);
 
   /* Stabs debugging sections.  */
   .stab          0 : { *(.stab) }
