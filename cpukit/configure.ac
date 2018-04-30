@@ -451,6 +451,7 @@ score/cpu/arm/Makefile
 score/cpu/bfin/Makefile
 score/cpu/epiphany/Makefile
 score/cpu/i386/Makefile
+score/cpu/x86_64/Makefile
 score/cpu/lm32/Makefile
 score/cpu/m68k/Makefile
 score/cpu/m32c/Makefile

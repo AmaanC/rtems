@@ -124,6 +124,9 @@ extern "C" {
 #elif defined(__i386__)
 #define SHM_LOCK_VALUE    0x80000000
 #define SHM_UNLOCK_VALUE  0
+#elif defined(__x86_64__)
+#define SHM_LOCK_VALUE    0x80000000
+#define SHM_UNLOCK_VALUE  0
 #elif defined(__mips__)
 #define SHM_LOCK_VALUE    0x80000000
 #define SHM_UNLOCK_VALUE  0
