@@ -9,7 +9,13 @@ dist_project_lib_DATA = startup/bsp_specs
 DISTCLEANFILES = include/bspopts.h
 noinst_PROGRAMS =
 
-project_lib_DATA = linkcmds
+# XXX: Add start.o to replace crt0.o as startfile for bsp_specs
+start.o: start/start.S
+	$(CPPASCOMPILE) -o $@ -c $<
+
+project_lib_DATA = start.o
+
+project_lib_DATA += linkcmds
 
 noinst_LIBRARIES = libbsp.a
 libbsp_a_SOURCES =
