@@ -3,7 +3,7 @@
 
 *startfile:
 %{!qrtems: %(old_startfile)} \
-%{!nostdlib: %{qrtems: crtbegin.o%s}}
+%{!nostdlib: %{qrtems: crti.o%s crtbegin.o%s}}
 
 *endfile:
-%{!qrtems: %(old_endfile)} %{qrtems: crtend.o%s}
+%{!qrtems: %(old_endfile)} %{qrtems: crtend.o%s crtn.o%s}
