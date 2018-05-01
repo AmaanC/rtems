@@ -124,3 +124,5 @@ void *_CPU_Thread_Idle_body( uintptr_t ignored )
   for( ; ; )
     /* insert your "halt" instruction here */ ;
 }
+
+void _CPU_Exception_frame_print (const CPU_Exception_frame *ctx) {}
