@@ -13,6 +13,8 @@
 
 #include <bsp.h>
 #include <rtems/libio.h>
+#include <rtems.h>
+#include <rtems/bspIo.h>
 
 /*  console_initialize
  *
@@ -215,3 +217,6 @@ rtems_device_driver console_control(
 {
   return RTEMS_SUCCESSFUL;
 }
+
+void BSP_outch(char ch) { (void) ch; }
+BSP_output_char_function_type     BSP_output_char = BSP_outch;
