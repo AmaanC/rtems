@@ -27,11 +27,6 @@ librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/console/console.c
 # timer
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/btimer/btimer.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/btimer/timerisr.c
-# shmsupp
-librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/mpci/addrconv.c
-librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/mpci/getcfg.c
-librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/mpci/lock.c
-librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/mpci/mpisr.c
 
 
 include $(top_srcdir)/../../../../automake/local.am
