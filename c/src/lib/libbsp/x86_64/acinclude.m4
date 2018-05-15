@@ -2,8 +2,8 @@
 AC_DEFUN([RTEMS_CHECK_BSPDIR],
 [
   case "$1" in
-  no_bsp )
-    AC_CONFIG_SUBDIRS([no_bsp]);;
+  amd64 )
+    AC_CONFIG_SUBDIRS([amd64]);;
   *)
     AC_MSG_ERROR([Invalid BSP]);;
   esac
