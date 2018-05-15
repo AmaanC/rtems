@@ -20,7 +20,7 @@
 #include <bsp.h>
 
 void Clock_exit( void );
-rtems_isr Clock_isr( rtems_vector_number vector );
+static rtems_isr Clock_isr( rtems_vector_number vector );
 
 /*
  *  The interrupt vector number associated with the clock tick device
