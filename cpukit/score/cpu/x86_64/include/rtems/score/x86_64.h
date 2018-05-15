@@ -22,6 +22,7 @@ extern "C" {
  */
 
 #define CPU_NAME "x86-64"
+#define CPU_MODEL_NAME "XXX: x86-64 generic"
 
 #ifdef __cplusplus
 }
