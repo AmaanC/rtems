@@ -3,7 +3,7 @@ ACLOCAL_AMFLAGS = -I ../../../../aclocal
 include $(top_srcdir)/../../../../automake/compile.am
 include $(top_srcdir)/../../bsp.am
 
-dist_project_lib_DATA = ../../../../../../bsps/no_cpu/no_bsp/start/bsp_specs
+dist_project_lib_DATA = ../../../../../../bsps/x86_64/amd64/start/bsp_specs
 
 noinst_PROGRAMS =
 
@@ -15,25 +15,25 @@ librtemsbsp_a_SOURCES =
 # startup
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/start/bspfatal-default.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/start/bspgetworkarea-default.c
-librtemsbsp_a_SOURCES += ../../../../../../bsps/no_cpu/no_bsp/start/bspstart.c
+librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/start/bspstart.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/start/sbrk.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/dev/getentropy/getentropy-cpucounter.c
-librtemsbsp_a_SOURCES += ../../../../../../bsps/no_cpu/no_bsp/start/setvec.c
+librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/start/setvec.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/start/bspreset-empty.c
 # clock
-librtemsbsp_a_SOURCES +=../../../../../../bsps/no_cpu/no_bsp/clock/ckinit.c
+librtemsbsp_a_SOURCES +=../../../../../../bsps/x86_64/amd64/clock/ckinit.c
 # console
-librtemsbsp_a_SOURCES += ../../../../../../bsps/no_cpu/no_bsp/console/console.c
+librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/console/console.c
 # timer
-librtemsbsp_a_SOURCES += ../../../../../../bsps/no_cpu/no_bsp/btimer/btimer.c
-librtemsbsp_a_SOURCES += ../../../../../../bsps/no_cpu/no_bsp/btimer/timerisr.c
+librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/btimer/btimer.c
+librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/btimer/timerisr.c
 # shmsupp
-librtemsbsp_a_SOURCES += ../../../../../../bsps/no_cpu/no_bsp/mpci/addrconv.c
-librtemsbsp_a_SOURCES += ../../../../../../bsps/no_cpu/no_bsp/mpci/getcfg.c
-librtemsbsp_a_SOURCES += ../../../../../../bsps/no_cpu/no_bsp/mpci/lock.c
-librtemsbsp_a_SOURCES += ../../../../../../bsps/no_cpu/no_bsp/mpci/mpisr.c
+librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/mpci/addrconv.c
+librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/mpci/getcfg.c
+librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/mpci/lock.c
+librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/mpci/mpisr.c
 
 
 include $(top_srcdir)/../../../../automake/local.am
 include $(srcdir)/../../../../../../bsps/shared/shared-sources.am
-include $(srcdir)/../../../../../../bsps/no_cpu/no_bsp/headers.am
+include $(srcdir)/../../../../../../bsps/x86_64/amd64/headers.am
