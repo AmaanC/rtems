@@ -119,7 +119,7 @@ extern "C" {
  *
  * XXX document implementation including references if appropriate
  */
-#define CPU_ALLOCATE_INTERRUPT_STACK TRUE
+#define CPU_ALLOCATE_INTERRUPT_STACK FALSE
 
 /**
  * Does the RTEMS invoke the user's ISR with the vector number and
@@ -619,7 +619,7 @@ extern Context_Control_fp _CPU_Null_fp_context;
  * value will be used to calculate offsets of structure members.  These
  * offsets will be used in assembler code.
  */
-#define CPU_SIZEOF_POINTER         4
+#define CPU_SIZEOF_POINTER         8
 
 /**
  * CPU's worst alignment requirement for data types on a byte boundary.  This
@@ -1489,10 +1489,10 @@ CPU_Counter_ticks _CPU_Counter_difference(
     context->is_executing = is_executing;
   }
 
+#endif
+
 /** Type that can store a 32-bit integer or a pointer. */
 typedef uintptr_t CPU_Uint32ptr;
-
-#endif
 
 #ifdef __cplusplus
 }

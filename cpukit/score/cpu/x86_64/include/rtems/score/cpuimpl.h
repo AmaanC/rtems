@@ -52,7 +52,7 @@ typedef struct {
  * This is optional.  Not every CPU port needs this.  It is only an optional
  * optimization variant.
  */
-register struct Per_CPU_Control *_CPU_Per_CPU_current asm( "rX" );
+//register struct Per_CPU_Control *_CPU_Per_CPU_current asm( "rX" );
 
 /**
  * @brief Optional method to obtain the per-CPU control of the current processor.
@@ -61,7 +61,7 @@ register struct Per_CPU_Control *_CPU_Per_CPU_current asm( "rX" );
  * optimization variant.  In case this macro is undefined, the default
  * implementation using the current processor index will be used.
  */
-#define _CPU_Get_current_per_CPU_control() ( _CPU_Per_CPU_current )
+//#define _CPU_Get_current_per_CPU_control() ( _CPU_Per_CPU_current )
 
 /**
  * @brief Optional method to get the executing thread.
@@ -71,7 +71,7 @@ register struct Per_CPU_Control *_CPU_Per_CPU_current asm( "rX" );
  * implementation uses the per-CPU information and the current processor index
  * to get the executing thread.
  */
-#define _CPU_Get_thread_executing() ( _CPU_Per_CPU_current->executing )
+//#define _CPU_Get_thread_executing() ( _CPU_Per_CPU_current->executing )
 
 #ifdef __cplusplus
 }
