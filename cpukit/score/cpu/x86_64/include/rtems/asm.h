@@ -43,7 +43,7 @@
 #define ASM
 #endif
 #include <rtems/score/cpuopts.h>
-#include <rtems/score/no_cpu.h>
+#include <rtems/score/x86_64.h>
 
 #ifndef __USER_LABEL_PREFIX__
 /**

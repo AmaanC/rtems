@@ -41,7 +41,7 @@ extern "C" {
 #endif
 
 #include <rtems/score/basedefs.h>
-#include <rtems/score/no_cpu.h>
+#include <rtems/score/x86_64.h>
 
 /* conditional compilation parameters */
 
@@ -167,11 +167,7 @@ extern "C" {
  *
  * XXX document implementation including references if appropriate
  */
-#if ( NO_CPU_HAS_FPU == 1 )
 #define CPU_HARDWARE_FP     TRUE
-#else
-#define CPU_HARDWARE_FP     FALSE
-#endif
 #define CPU_SOFTWARE_FP     FALSE
 
 /**
