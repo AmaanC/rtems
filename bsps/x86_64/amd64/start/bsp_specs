@@ -1,7 +1,12 @@
-%rename lib old_lib
+# XXX: Try to use linkcmds instead of this
+# https://lists.rtems.org/pipermail/devel/2018-May/021430.html
 
-*lib:
-%{!qrtems: %(old_lib)} \
-%{!nostdlib: %{qrtems: --start-group -lrtemsbsp -lrtemscpu -lc -lgcc --end-group \
-%{!qnolinkcmds: -T linkcmds%s}}}
+%rename endfile old_endfile
+%rename startfile old_startfile
 
+*startfile:
+%{!qrtems: %(old_startfile)} \
+%{!nostdlib: %{qrtems: crti.o%s crtbegin.o%s}}
+
+*endfile:
+%{!qrtems: %(old_endfile)} %{qrtems: crtend.o%s crtn.o%s}
