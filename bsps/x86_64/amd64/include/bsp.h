@@ -14,8 +14,8 @@
  *  http://www.rtems.org/license/LICENSE.
  */
 
-#ifndef LIBBSP_NO_CPU_NO_BSP_BSP_H
-#define LIBBSP_NO_CPU_NO_BSP_BSP_H
+#ifndef LIBBSP_X86_64_AMD64_BSP_H
+#define LIBBSP_X86_64_AMD64_BSP_H
 
 #include <bspopts.h>
 #include <bsp/default-initial-extension.h>

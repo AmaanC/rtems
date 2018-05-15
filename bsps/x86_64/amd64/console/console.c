@@ -9,7 +9,8 @@
  *  http://www.rtems.org/license/LICENSE.
  */
 
-#define NO_BSP_INIT
+// XXX: Do we need this?
+// #define NO_BSP_INIT
 
 #include <bsp.h>
 #include <rtems/libio.h>
