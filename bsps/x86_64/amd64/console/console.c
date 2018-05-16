@@ -13,6 +13,7 @@
 // #define NO_BSP_INIT
 
 #include <bsp.h>
+#include <rtems/bspIo.h>
 #include <rtems/libio.h>
 
 /*  console_initialize
@@ -216,3 +217,7 @@ rtems_device_driver console_control(
 {
   return RTEMS_SUCCESSFUL;
 }
+
+// XXX:
+void BSP_outch(char c) {}
+BSP_output_char_function_type     BSP_output_char = BSP_outch;

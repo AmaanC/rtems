@@ -21,6 +21,10 @@
 #include <rtems/score/isr.h>
 #include <rtems/score/wkspace.h>
 
+// XXX:
+Context_Control_fp _CPU_Null_fp_context;
+void _CPU_Exception_frame_print (const CPU_Exception_frame *ctx) {}
+
 void _CPU_Initialize(void)
 {
   /*
