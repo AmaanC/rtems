@@ -167,7 +167,7 @@ extern "C" {
  *
  * XXX document implementation including references if appropriate
  */
-#define CPU_HARDWARE_FP     TRUE
+#define CPU_HARDWARE_FP     FALSE
 #define CPU_SOFTWARE_FP     FALSE
 
 /**
