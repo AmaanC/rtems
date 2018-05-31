@@ -72,22 +72,7 @@ void _CPU_ISR_install_vector(
   proc_ptr   *old_handler
 )
 {
-   *old_handler = _ISR_Vector_table[ vector ];
-
-   /*
-    *  If the interrupt vector table is a table of pointer to isr entry
-    *  points, then we need to install the appropriate RTEMS interrupt
-    *  handler for this vector number.
-    */
-
-   _CPU_ISR_install_raw_handler( vector, new_handler, old_handler );
-
-   /*
-    *  We put the actual user ISR address in '_ISR_vector_table'.  This will
-    *  be used by the _ISR_Handler so the user gets control.
-    */
-
-    _ISR_Vector_table[ vector ] = new_handler;
+  // XXX
 }
 
 /*

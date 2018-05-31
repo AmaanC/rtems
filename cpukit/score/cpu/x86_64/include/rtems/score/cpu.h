@@ -85,7 +85,7 @@ extern "C" {
  *
  * XXX document implementation including references if appropriate
  */
-#define CPU_SIMPLE_VECTORED_INTERRUPTS TRUE
+#define CPU_SIMPLE_VECTORED_INTERRUPTS FALSE
 
 /**
  * Does this CPU have hardware support for a dedicated interrupt stack?
@@ -567,30 +567,6 @@ extern Context_Control_fp _CPU_Null_fp_context;
  * XXX document implementation including references if appropriate
  */
 #define CPU_MPCI_RECEIVE_SERVER_EXTRA_STACK 0
-
-/**
- * @ingroup CPUInterrupt
- * 
- * This defines the number of entries in the _ISR_Vector_table managed by RTEMS
- * in case CPU_SIMPLE_VECTORED_INTERRUPTS is defined to TRUE.  It must be a
- * compile-time constant.
- *
- * It must be undefined in case CPU_SIMPLE_VECTORED_INTERRUPTS is defined to
- * FALSE.
- */
-#define CPU_INTERRUPT_NUMBER_OF_VECTORS      32
-
-/**
- * @ingroup CPUInterrupt
- * 
- * This defines the highest interrupt vector number for this port in case
- * CPU_SIMPLE_VECTORED_INTERRUPTS is defined to TRUE.  It must be less than
- * CPU_INTERRUPT_NUMBER_OF_VECTORS.  It may be not a compile-time constant.
- *
- * It must be undefined in case CPU_SIMPLE_VECTORED_INTERRUPTS is defined to
- * FALSE.
- */
-#define CPU_INTERRUPT_MAXIMUM_VECTOR_NUMBER  (CPU_INTERRUPT_NUMBER_OF_VECTORS - 1)
 
 /**
  * @ingroup CPUInterrupt
