@@ -1,32 +1,14 @@
 /**
  * @file rtems/score/cpu.h
  *
- * @brief NO_CPU Department Source
+ * @brief x86_64 Dependent Source
  *
- * This include file contains information pertaining to the NO_CPU
+ * This include file contains information pertaining to the x86_64 / AMD64 / x64
  * processor.
  */
 
 /*
- *  This include file contains information pertaining to the XXX
- *  processor.
- *
- *  @note This file is part of a porting template that is intended
- *  to be used as the starting point when porting RTEMS to a new
- *  CPU family.  The following needs to be done when using this as
- *  the starting point for a new port:
- *
- *  + Anywhere there is an XXX, it should be replaced
- *    with information about the CPU family being ported to.
- *
- *  + At the end of each comment section, there is a heading which
- *    says "Port Specific Information:".  When porting to RTEMS,
- *    add CPU family specific information in this section
- */
-
-/*
- *  COPYRIGHT (c) 1989-2008.
- *  On-Line Applications Research Corporation (OAR).
+ *  COPYRIGHT (c) 2018 Amaan Cheval <amaan.cheval@gmail.com>
  *
  *  The license and distribution terms for this file may be
  *  found in the file LICENSE in this distribution or at
