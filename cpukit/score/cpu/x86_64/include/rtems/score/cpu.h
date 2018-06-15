@@ -394,38 +394,15 @@ extern Context_Control_fp _CPU_Null_fp_context;
  */
 #define _CPU_Initialize_vectors()
 
-/**
- * @ingroup CPUInterrupt
- * 
- * Disable all interrupts for an RTEMS critical section.  The previous
- * level is returned in @a _isr_cookie.
- *
- * @param[out] _isr_cookie will contain the previous level cookie
- *
- * Port Specific Information:
- *
- * XXX document implementation including references if appropriate
- */
+// XXX: For RTEMS critical sections
 #define _CPU_ISR_Disable( _isr_cookie ) \
   { \
     (_isr_cookie) = 0;   /* do something to prevent warnings */ \
   }
 
-/**
- * @ingroup CPUInterrupt
- * 
- * Enable interrupts to the previous level (returned by _CPU_ISR_Disable).
- * This indicates the end of an RTEMS critical section.  The parameter
- * @a _isr_cookie is not modified.
- *
- * @param[in] _isr_cookie contain the previous level cookie
- *
- * Port Specific Information:
- *
- * XXX document implementation including references if appropriate
- */
 #define _CPU_ISR_Enable( _isr_cookie )  \
   { \
+    (void) (_isr_cookie);   /* prevent warnings from -Wunused-but-set-variable */ \
   }
 
 /**

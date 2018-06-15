@@ -23,6 +23,7 @@
 uint32_t         Timer_interrupts;
 bool benchmark_timer_find_average_overhead;
 
+// XXX: Evaluate if timerisr needs to be called somewhere in this file
 void benchmark_timer_initialize( void )
 {
 

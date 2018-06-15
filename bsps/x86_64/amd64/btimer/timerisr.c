@@ -29,6 +29,8 @@
 
 extern uint32_t         _Timer_interrupts;
 
+void timerisr( void );
+
 void timerisr( void )
 {
   /*
