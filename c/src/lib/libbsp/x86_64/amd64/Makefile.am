@@ -29,6 +29,7 @@ librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/console/console.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/btimer/btimer.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/btimer/timerisr.c
 
+librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/shared/cache/cache.c
 
 include $(top_srcdir)/../../../../automake/local.am
 include $(srcdir)/../../../../../../bsps/shared/shared-sources.am
