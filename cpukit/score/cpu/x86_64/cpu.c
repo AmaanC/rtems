@@ -20,6 +20,7 @@
 #include <rtems/system.h>
 #include <rtems/score/isr.h>
 #include <rtems/score/wkspace.h>
+#include <rtems/score/tls.h>
 
 // XXX:
 Context_Control_fp _CPU_Null_fp_context;
@@ -35,6 +36,40 @@ void _CPU_Initialize(void)
    */
 
   /* FP context initialization support goes here */
+}
+
+void _CPU_Context_Initialize(
+  Context_Control *the_context,
+  void *stack_area_begin,
+  size_t stack_area_size,
+  uint32_t new_level,
+  void (*entry_point)( void ),
+  bool is_fp,
+  void *tls_area
+)
+{
+  uint32_t _stack;
+  uint32_t tcb;
+
+  (void) is_fp; /* avoid warning for being unused */
+
+  // XXX: Leaving interrupts off for now
+  the_context->rflags = 0x0000000000003002;
+
+  _stack  = ((uint32_t)(stack_area_begin)) + (stack_area_size);
+  _stack &= ~ (CPU_STACK_ALIGNMENT - 1);
+  _stack -= 2*sizeof(proc_ptr*); /* see above for why we need to do this */
+  *((proc_ptr *)(_stack)) = (entry_point);
+  the_context->rbp     = (void *) 0;
+  the_context->rsp     = (void *) _stack;
+
+  if ( tls_area != NULL ) {
+    tcb = (uint32_t) _TLS_TCB_after_TLS_block_initialize( tls_area );
+  } else {
+    tcb = 0;
+  }
+
+  // XXX: Use FS for tcb - can leave out for now
 }
 
 uint32_t   _CPU_ISR_Get_level( void )

@@ -57,17 +57,8 @@
 #define __USER_LABEL_PREFIX__ _
 #endif
 
-#ifndef __REGISTER_PREFIX__
-/**
- *  Recent versions of GNU cpp define variables which indicate the
- *  need for underscores and percents.  If not using GNU cpp or
- *  the version does not support this, then you will obviously
- *  have to define these as appropriate.
- *
- *  This symbol is prefixed to all register names.
- */
-#define __REGISTER_PREFIX__
-#endif
+#undef __REGISTER_PREFIX__
+#define __REGISTER_PREFIX__ %
 
 #include <rtems/concat.h>
 
@@ -82,6 +73,24 @@
  *
  *  EXAMPLE:     #define d0 REG (d0)
  */
+#define rax REG (rax)
+#define rbx REG (rbx)
+#define rcx REG (rcx)
+#define rdx REG (rdx)
+#define rdi REG (rdi)
+#define rsi REG (rsi)
+#define rbp REG (rbp)
+#define rsp REG (rsp)
+#define r8 REG (r8)
+#define r9 REG (r9)
+#define r10 REG (r10)
+#define r11 REG (r11)
+#define r12 REG (r12)
+#define r13 REG (r13)
+#define r14 REG (r14)
+#define r15 REG (r15)
+
+// XXX: Sizes, segments
 
 /*
  *  Define macros to handle section beginning and ends.

@@ -46,6 +46,8 @@ extern "C" {
 #define CPU_MODES_INTERRUPT_MASK   0x00000001
 #define CPU_MAXIMUM_PROCESSORS 32
 
+#ifndef ASM
+
 /*
  *  Processor defined structures required for cpukit/score.
  *
@@ -107,22 +109,31 @@ extern "C" {
  * to another.
  */
 typedef struct {
-    /**
-     * This field is a hint that a port will have a number of integer
-     * registers that need to be saved at a context switch.
-     */
-    uint32_t   some_integer_register;
-    /**
-     * This field is a hint that a port will have a number of system
-     * registers that need to be saved at a context switch.
-     */
-    uint32_t   some_system_register;
+  uint32_t rflags;
 
-    /**
-     * This field is a hint that a port will have a register that
-     * is the stack pointer.
-     */
-    uint32_t   stack_pointer;
+  /**
+   * All general-purpose registers
+   */
+  // XXX: rax is used as the running thread context
+  // REMEMBER: Struct positioning will change in cpu_asm if you change it here too!
+  //uint32_t rax;
+  uint32_t rbx;
+  uint32_t rcx;
+  uint32_t rdx;
+  uint32_t rdi;
+  uint32_t rsi;
+  uint32_t *rbp;
+  uint32_t *rsp;
+  uint32_t r8;
+  uint32_t r9;
+  uint32_t r10;
+  uint32_t r11;
+  uint32_t r12;
+  uint32_t r13;
+  uint32_t r14;
+  uint32_t r15;
+
+  // xxx: fs for tls
 
 #ifdef RTEMS_SMP
     /**
@@ -183,7 +194,7 @@ typedef struct {
  * @return This method returns the stack pointer.
  */
 #define _CPU_Context_Get_SP( _context ) \
-  (_context)->stack_pointer
+  (_context)->rsp
 
 /**
  * @ingroup Management
@@ -192,6 +203,7 @@ typedef struct {
  * be saved during any context switch from one thread to another.
  */
 typedef struct {
+  // XXX: MMX, XMM, others?
     /** FPU registers are listed here */
     double      some_float_register;
 } Context_Control_fp;
@@ -254,6 +266,9 @@ extern Context_Control_fp _CPU_Null_fp_context;
  */
 
 /* XXX: if needed, put more variables here */
+
+#endif /* ASM */
+
 
 /**
  * @ingroup CPUContext
@@ -383,6 +398,7 @@ extern Context_Control_fp _CPU_Null_fp_context;
  *  ISR handler macros
  */
 
+#ifndef ASM
 /**
  * @ingroup CPUInterrupt
  * 
@@ -532,10 +548,15 @@ uint32_t   _CPU_ISR_Get_level( void );
  *
  * XXX document implementation including references if appropriate
  */
-#define _CPU_Context_Initialize( _the_context, _stack_base, _size, \
-                                 _isr, _entry_point, _is_fp, _tls_area ) \
-  { \
-  }
+void _CPU_Context_Initialize(
+  Context_Control *the_context,
+  void *stack_area_begin,
+  size_t stack_area_size,
+  uint32_t new_level,
+  void (*entry_point)( void ),
+  bool is_fp,
+  void *tls_area
+);
 
 /**
  * This routine is responsible for somehow restarting the currently
@@ -888,7 +909,7 @@ void _CPU_Context_restore_fp(
  *
  * @see _CPU_Context_validate().
  */
-void _CPU_Context_volatile_clobber( uintptr_t pattern );
+static inline void _CPU_Context_volatile_clobber( uintptr_t pattern );
 
 /**
  * @ingroup CPUContext
@@ -905,7 +926,19 @@ void _CPU_Context_volatile_clobber( uintptr_t pattern );
  *
  * @see _CPU_Context_volatile_clobber().
  */
-void _CPU_Context_validate( uintptr_t pattern );
+static inline void _CPU_Context_validate( uintptr_t pattern );
+
+static inline void _CPU_Context_volatile_clobber( uintptr_t pattern )
+{
+  /* TODO */
+}
+
+static inline void _CPU_Context_validate( uintptr_t pattern )
+{
+  while (1) {
+    /* TODO */
+  }
+}
 
 /**
  * @brief The set of registers that specifies the complete processor state.
@@ -1013,10 +1046,14 @@ CPU_Counter_ticks _CPU_Counter_read( void );
  *
  * @return Returns second minus first modulo counter period.
  */
-CPU_Counter_ticks _CPU_Counter_difference(
+
+static inline CPU_Counter_ticks _CPU_Counter_difference(
   CPU_Counter_ticks second,
   CPU_Counter_ticks first
-);
+)
+{
+  return second - first;
+}
 
 #ifdef RTEMS_SMP
   /**
@@ -1162,5 +1199,7 @@ typedef uintptr_t CPU_Uint32ptr;
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* ASM */
 
 #endif
