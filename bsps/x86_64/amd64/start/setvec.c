@@ -32,7 +32,10 @@ rtems_isr_entry set_vector(                     /* returns old vector */
   rtems_isr_entry previous_isr;
 
   if ( type )
-    rtems_interrupt_catch( handler, vector, (rtems_isr_entry *) &previous_isr );
+  {
+    // XXX: Only applies for the simple vectored interrupt model
+    // rtems_interrupt_catch( handler, vector, (rtems_isr_entry *) &previous_isr );
+  }
   else {
     /* XXX: install non-RTEMS ISR as "raw" interupt */
   }
