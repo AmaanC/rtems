@@ -220,4 +220,6 @@ rtems_device_driver console_control(
 
 // XXX:
 void BSP_outch(char c) {}
+int BSP_inch(void) {}
 BSP_output_char_function_type     BSP_output_char = BSP_outch;
+BSP_polling_getchar_function_type BSP_poll_char = BSP_inch;
