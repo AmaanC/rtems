@@ -15,8 +15,10 @@ HeapSize = DEFINED(HeapSize) ? HeapSize :
           DEFINED(_HeapSize) ? _HeapSize : 0x0;
 RamBase = DEFINED(RamBase) ? RamBase    :
           DEFINED(_RamBase) ? _RamBase : 0x0;
+
+/* XXX: Defaulting to 2GiB, reconsider? */
 RamSize = DEFINED(RamSize) ? RamSize    :
-          DEFINED(_RamSize) ? _RamSize : 0xFFFFFFFFFFFFFFFF;
+          DEFINED(_RamSize) ? _RamSize : 0x80000000;
 
 SECTIONS
 {
