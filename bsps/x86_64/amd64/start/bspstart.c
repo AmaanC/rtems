@@ -22,6 +22,8 @@
  *  This routine does the bulk of the system initialization.
  */
 
+void bsp_start( void );
+
 void bsp_start( void )
 {
 }
