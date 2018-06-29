@@ -33,11 +33,11 @@
         .p2align  1
         PUBLIC (_CPU_Context_switch)
 
-.set RUNCONTEXT_ARG,   8                   /* save context argument */
-.set HEIRCONTEXT_ARG,  16                  /* restore context argument */
+.set RUNCONTEXT_ARG,   rdi                   /* save context argument #1 */
+.set HEIRCONTEXT_ARG,  rsi                   /* restore context argument #2 */
 
 SYM (_CPU_Context_switch):
-        movq      RUNCONTEXT_ARG(rsp), rax  /* rax = running threads context */
+        movq      RUNCONTEXT_ARG, rax  /* rax = running threads context */
         pushf                              /* push rflags */
         popq      (0  * CPU_SIZEOF_POINTER)(rax)          /* save rflags */
    	    movq rbx, (1  * CPU_SIZEOF_POINTER)(rax)
@@ -60,7 +60,7 @@ SYM (_CPU_Context_switch):
 
     // XXX: RTEMS_SMP considerations?
 
-        movq      HEIRCONTEXT_ARG(rsp), rax /* rax = heir threads context */
+        movq      HEIRCONTEXT_ARG, rax /* rax = heir threads context */
 
 restore:
         pushq     (0  * CPU_SIZEOF_POINTER)(rax)          /* push rflags */
@@ -68,6 +68,7 @@ restore:
    	    movq (1  * CPU_SIZEOF_POINTER)(rax), rbx
    	    movq (2  * CPU_SIZEOF_POINTER)(rax), rcx
    	    movq (3  * CPU_SIZEOF_POINTER)(rax), rdx
+	// XXX: Should registers part of the calling convention be saved at all? Why?
    	    movq (4  * CPU_SIZEOF_POINTER)(rax), rdi
    	    movq (5  * CPU_SIZEOF_POINTER)(rax), rsi
    	    movq (6  * CPU_SIZEOF_POINTER)(rax), rbp
@@ -97,10 +98,10 @@ restore:
 
         PUBLIC (_CPU_Context_restore)
 
-.set NEWCONTEXT_ARG,   8                   /* context to restore argument */
+.set NEWCONTEXT_ARG,   rdi                   /* context to restore argument */
 
 SYM (_CPU_Context_restore):
-        movq      NEWCONTEXT_ARG(rsp),rax  /* rax = running threads context */
+        movq      NEWCONTEXT_ARG, rax  /* rax = running threads context */
         jmp       restore
 
 END_CODE

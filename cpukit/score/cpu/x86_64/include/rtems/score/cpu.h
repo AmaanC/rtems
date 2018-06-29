@@ -109,29 +109,29 @@ extern "C" {
  * to another.
  */
 typedef struct {
-  uint32_t rflags;
+  uint64_t rflags;
 
   /**
    * All general-purpose registers
    */
   // XXX: rax is used as the running thread context
   // REMEMBER: Struct positioning will change in cpu_asm if you change it here too!
-  //uint32_t rax;
-  uint32_t rbx;
-  uint32_t rcx;
-  uint32_t rdx;
-  uint32_t rdi;
-  uint32_t rsi;
-  uint32_t *rbp;
-  uint32_t *rsp;
-  uint32_t r8;
-  uint32_t r9;
-  uint32_t r10;
-  uint32_t r11;
-  uint32_t r12;
-  uint32_t r13;
-  uint32_t r14;
-  uint32_t r15;
+  //uint64_t rax;
+  uint64_t rbx;
+  uint64_t rcx;
+  uint64_t rdx;
+  uint64_t rdi;
+  uint64_t rsi;
+  uint64_t *rbp;
+  uint64_t *rsp;
+  uint64_t r8;
+  uint64_t r9;
+  uint64_t r10;
+  uint64_t r11;
+  uint64_t r12;
+  uint64_t r13;
+  uint64_t r14;
+  uint64_t r15;
 
   // xxx: fs for tls
 
