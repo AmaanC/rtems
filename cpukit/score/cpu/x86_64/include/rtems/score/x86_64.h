@@ -24,6 +24,23 @@ extern "C" {
 #define CPU_NAME "x86-64"
 #define CPU_MODEL_NAME "XXX: x86-64 generic"
 
+#define inport_byte( _port, _value )                \
+  do { unsigned short __port  = _port;              \
+    unsigned char  __value = 0;                     \
+                                                    \
+    __asm__ volatile ( "inb %1,%0" : "=a" (__value) \
+                       : "d"  (__port)              \
+      );                                            \
+    _value = __value;                               \
+  } while (0)
+
+#define outport_byte( _port, _value )                                   \
+  do { unsigned short __port  = _port;                                  \
+    unsigned char  __value = _value;                                    \
+                                                                        \
+    __asm__ volatile ( "outb %0,%1" : : "a" (__value), "d" (__port) );  \
+  } while (0)
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,225 +1,60 @@
 /*
  *  This file contains the template for a console IO package.
  *
- *  COPYRIGHT (c) 1989-1999.
- *  On-Line Applications Research Corporation (OAR).
+ *  COPYRIGHT (c) 2018.
+ *  Amaan Cheval <amaan.cheval@gmail.com>
  *
  *  The license and distribution terms for this file may be
  *  found in the file LICENSE in this distribution or at
  *  http://www.rtems.org/license/LICENSE.
  */
 
-// XXX: Do we need this?
-// #define NO_BSP_INIT
-
-#include <bsp.h>
+#include <libchip/ns16550.h>
 #include <rtems/bspIo.h>
-#include <rtems/libio.h>
+#include <bsp.h>
+#include <bsp/console-termios.h>
 
-/*  console_initialize
- *
- *  This routine initializes the console IO driver.
- *
- *  Input parameters: NONE
- *
- *  Output parameters:  NONE
- *
- *  Return values:
- */
-
-rtems_device_driver console_initialize(
-  rtems_device_major_number  major,
-  rtems_device_minor_number  minor,
-  void                      *arg
-)
+static uint8_t amd64_uart_get_register(uintptr_t addr, uint8_t i)
 {
-  rtems_status_code status;
+  register uint8_t val;
 
-  status = rtems_io_register_name(
-    "/dev/console",
-    major,
-    (rtems_device_minor_number) 0
-  );
-
-  if (status != RTEMS_SUCCESSFUL)
-    rtems_fatal_error_occurred(status);
-
-  return RTEMS_SUCCESSFUL;
+  inport_byte( (addr + i), val );
+  return val;
 }
 
-/*  is_character_ready
- *
- *  This routine returns TRUE if a character is available.
- *
- *  Input parameters: NONE
- *
- *  Output parameters:  NONE
- *
- *  Return values:
- */
-
-bool is_character_ready(
-  char *ch
-)
+static void amd64_uart_set_register(uintptr_t addr, uint8_t i, uint8_t val)
 {
-  *ch = '\0';   /* return NULL for no particular reason */
-  return true;
+  outport_byte( (addr + i), val );
 }
 
-/*  inbyte
- *
- *  This routine reads a character from the SOURCE.
- *
- *  Input parameters: NONE
- *
- *  Output parameters:  NONE
- *
- *  Return values:
- *    character read from SOURCE
- */
+static ns16550_context amd64_uart_context = {
+  .base = RTEMS_TERMIOS_DEVICE_CONTEXT_INITIALIZER("UART"),
+  .get_reg = amd64_uart_get_register,
+  .set_reg = amd64_uart_set_register,
+  .port = (uintptr_t) 0x3F8,
+//  .irq = NULL,
+  .initial_baud = (115200 * 16)
+};
 
-char inbyte( void )
+
+const console_device console_device_table[] = {
+    {
+      .device_file = "/dev/console",
+      .probe = console_device_probe_default,
+      .handler = &ns16550_handler_polled,
+      .context = &amd64_uart_context.base
+    },
+};
+
+const size_t console_device_count = RTEMS_ARRAY_SIZE(console_device_table);
+
+static void output_char(char c)
 {
-  /*
-   *  If polling, wait until a character is available.
-   */
+  rtems_termios_device_context *ctx = console_device_table[0].context;
 
-  return '\0';
+  ns16550_polled_putchar( ctx, c );
 }
 
-/*  outbyte
- *
- *  This routine transmits a character out the SOURCE.  It may support
- *  XON/XOFF flow control.
- *
- *  Input parameters:
- *    ch  - character to be transmitted
- *
- *  Output parameters:  NONE
- */
+BSP_output_char_function_type BSP_output_char = output_char;
 
-void outbyte(
-  char ch
-)
-{
-  /*
-   *  If polling, wait for the transmitter to be ready.
-   *  Check for flow control requests and process.
-   *  Then output the character.
-   */
-
-  /*
-   *  Carriage Return/New line translation.
-   */
-
-  if ( ch == '\n' )
-    outbyte( '\r' );
-}
-
-/*
- *  Open entry point
- */
-
-rtems_device_driver console_open(
-  rtems_device_major_number major,
-  rtems_device_minor_number minor,
-  void                    * arg
-)
-{
-  return RTEMS_SUCCESSFUL;
-}
-
-/*
- *  Close entry point
- */
-
-rtems_device_driver console_close(
-  rtems_device_major_number major,
-  rtems_device_minor_number minor,
-  void                    * arg
-)
-{
-  return RTEMS_SUCCESSFUL;
-}
-
-/*
- * read bytes from the serial port. We only have stdin.
- */
-
-rtems_device_driver console_read(
-  rtems_device_major_number major,
-  rtems_device_minor_number minor,
-  void                    * arg
-)
-{
-  rtems_libio_rw_args_t *rw_args;
-  char *buffer;
-  int maximum;
-  int count = 0;
-
-  rw_args = (rtems_libio_rw_args_t *) arg;
-
-  buffer = rw_args->buffer;
-  maximum = rw_args->count;
-
-  for (count = 0; count < maximum; count++) {
-    buffer[ count ] = inbyte();
-    if (buffer[ count ] == '\n' || buffer[ count ] == '\r') {
-      buffer[ count++ ]  = '\n';
-      break;
-    }
-  }
-
-  rw_args->bytes_moved = count;
-  return (count >= 0) ? RTEMS_SUCCESSFUL : RTEMS_UNSATISFIED;
-}
-
-/*
- * write bytes to the serial port. Stdout and stderr are the same.
- */
-
-rtems_device_driver console_write(
-  rtems_device_major_number major,
-  rtems_device_minor_number minor,
-  void                    * arg
-)
-{
-  int count;
-  int maximum;
-  rtems_libio_rw_args_t *rw_args;
-  char *buffer;
-
-  rw_args = (rtems_libio_rw_args_t *) arg;
-
-  buffer = rw_args->buffer;
-  maximum = rw_args->count;
-
-  for (count = 0; count < maximum; count++) {
-    if ( buffer[ count ] == '\n') {
-      outbyte('\r');
-    }
-    outbyte( buffer[ count ] );
-  }
-
-  rw_args->bytes_moved = maximum;
-  return 0;
-}
-
-/*
- *  IO Control entry point
- */
-
-rtems_device_driver console_control(
-  rtems_device_major_number major,
-  rtems_device_minor_number minor,
-  void                    * arg
-)
-{
-  return RTEMS_SUCCESSFUL;
-}
-
-// XXX:
-void BSP_outch(char c) {}
-int BSP_inch(void) {}
-BSP_output_char_function_type     BSP_output_char = BSP_outch;
-BSP_polling_getchar_function_type BSP_poll_char = BSP_inch;
+BSP_polling_getchar_function_type BSP_poll_char = NULL;
