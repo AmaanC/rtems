@@ -25,6 +25,7 @@ librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/start/bspreset-empty.c
 librtemsbsp_a_SOURCES +=../../../../../../bsps/x86_64/amd64/clock/ckinit.c
 # console
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/console/console.c
+librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/console/quick.c
 # timer
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/btimer/btimer.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/btimer/timerisr.c
