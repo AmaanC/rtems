@@ -25,9 +25,6 @@ extern "C" {
 #include <rtems/score/basedefs.h>
 #include <rtems/score/x86_64.h>
 
-#define CPU_HAS_SOFTWARE_INTERRUPT_STACK TRUE
-#define CPU_HAS_HARDWARE_INTERRUPT_STACK FALSE
-#define CPU_ALLOCATE_INTERRUPT_STACK TRUE
 #define CPU_SIMPLE_VECTORED_INTERRUPTS FALSE
 #define CPU_ISR_PASSES_FRAME_POINTER FALSE
 // XXX: Need to look into if models cause these to differ
@@ -43,6 +40,7 @@ extern "C" {
 #define CPU_STACK_GROWS_UP               FALSE
 
 #define CPU_STRUCTURE_ALIGNMENT __attribute__((aligned ( 64 )))
+#define CPU_CACHE_LINE_BYTES 64
 #define CPU_MODES_INTERRUPT_MASK   0x00000001
 #define CPU_MAXIMUM_PROCESSORS 32
 
@@ -393,6 +391,8 @@ extern Context_Control_fp _CPU_Null_fp_context;
  * XXX document implementation including references if appropriate
  */
 #define CPU_STACK_ALIGNMENT        16
+
+#define CPU_INTERRUPT_STACK_ALIGNMENT CPU_CACHE_LINE_BYTES
 
 /*
  *  ISR handler macros
@@ -1021,6 +1021,8 @@ static inline uint32_t CPU_swap_u32(
  * @brief Unsigned integer type for CPU counter values.
  */
 typedef uint32_t CPU_Counter_ticks;
+
+uint32_t _CPU_Counter_frequency( void );
 
 /**
  * @brief Returns the current CPU counter value.
