@@ -1,29 +1,21 @@
 /*
- *  This routine starts the application.  It includes application,
- *  board, and monitor specific initialization and configuration.
- *  The generic CPU dependent initialization has been performed
- *  before this routine is invoked.
- *
- *  COPYRIGHT (c) 1989-1999.
- *  On-Line Applications Research Corporation (OAR).
+ *  COPYRIGHT (c) 2018 Amaan Cheval <amaan.cheval@gmail.com>
  *
  *  The license and distribution terms for this file may be
  *  found in the file LICENSE in this distribution or at
  *  http://www.rtems.org/license/LICENSE.
  */
 
-#include <string.h>
-
 #include <bsp.h>
 
-/*
- *  bsp_start
- *
- *  This routine does the bulk of the system initialization.
- */
-
-void bsp_start( void );
-
-void bsp_start( void )
+void bsp_start(void);
+void bsp_start(void)
 {
 }
+
+/*
+ * XXX: We may want a custom bsp_work_area_initialize
+ *
+ * FreeBSD's bootloader may leave a bootinfo structure for the kernel to find later:
+ * http://fxr.watson.org/fxr/source/i386/include/bootinfo.h?v=FREEBSD11#L48
+ */
