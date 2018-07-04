@@ -1,10 +1,13 @@
 /**
  *  @file
  *
- *  @brief No CPU Dependent Source
+ *  @brief x86_64 Dependent Source
  */
 
 /*
+ *  COPYRIGHT (c) 2018.
+ *  Amaan Cheval <amaan.cheval@gmail.com>.
+ *
  *  COPYRIGHT (c) 1989-1999.
  *  On-Line Applications Research Corporation (OAR).
  *
@@ -22,7 +25,6 @@
 #include <rtems/score/wkspace.h>
 #include <rtems/score/tls.h>
 
-// XXX:
 Context_Control_fp _CPU_Null_fp_context;
 void _CPU_Exception_frame_print (const CPU_Exception_frame *ctx) {}
 
@@ -73,7 +75,6 @@ void _CPU_ISR_install_vector(
   proc_ptr   *old_handler
 )
 {
-  // XXX
 }
 
 /*

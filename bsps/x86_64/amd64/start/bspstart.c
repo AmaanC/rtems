@@ -7,8 +7,8 @@
  */
 
 #include <bsp.h>
+#include <bsp/bootcard.h>
 
-void bsp_start(void);
 void bsp_start(void)
 {
 }
