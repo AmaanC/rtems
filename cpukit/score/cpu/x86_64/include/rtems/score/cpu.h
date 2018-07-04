@@ -55,6 +55,8 @@ extern "C" {
  */
 
 /* may need to put some structures here.  */
+#define CPU_EFLAGS_INTERRUPTS_ON  0x00003202
+#define CPU_EFLAGS_INTERRUPTS_OFF 0x00003002
 
 /**
  * @defgroup CPUContext Processor Dependent Context Management
@@ -110,74 +112,20 @@ typedef struct {
   uint64_t rflags;
 
   /**
-   * All general-purpose registers
+   * Callee-saved registers as listed in the SysV ABI document:
+   * https://github.com/hjl-tools/x86-psABI/wiki/X86-psABI
    */
-  // XXX: rax is used as the running thread context
-  // REMEMBER: Struct positioning will change in cpu_asm if you change it here too!
-  //uint64_t rax;
   uint64_t rbx;
-  uint64_t rcx;
-  uint64_t rdx;
-  uint64_t rdi;
-  uint64_t rsi;
-  uint64_t *rbp;
-  uint64_t *rsp;
-  uint64_t r8;
-  uint64_t r9;
-  uint64_t r10;
-  uint64_t r11;
+  void    *rsp;
+  void    *rbp;
   uint64_t r12;
   uint64_t r13;
   uint64_t r14;
   uint64_t r15;
 
-  // xxx: fs for tls
+  // XXX: FS segment descriptor for TLS
 
 #ifdef RTEMS_SMP
-    /**
-     * @brief On SMP configurations the thread context must contain a boolean
-     * indicator to signal if this context is executing on a processor.
-     *
-     * This field must be updated during a context switch.  The context switch
-     * to the heir must wait until the heir context indicates that it is no
-     * longer executing on a processor.  This indicator must be updated using
-     * an atomic test and set operation to ensure that at most one processor
-     * uses the heir context at the same time.  The context switch must also
-     * check for a potential new heir thread for this processor in case the
-     * heir context is not immediately available.  Update the executing thread
-     * for this processor only if necessary to avoid a cache line
-     * monopolization.
-     *
-     * @code
-     * void _CPU_Context_switch(
-     *   Context_Control *executing_context,
-     *   Context_Control *heir_context
-     * )
-     * {
-     *   save( executing_context );
-     *
-     *   executing_context->is_executing = false;
-     *   memory_barrier();
-     *
-     *   if ( test_and_set( &heir_context->is_executing ) ) {
-     *     do {
-     *       Per_CPU_Control *cpu_self = _Per_CPU_Get_snapshot();
-     *       Thread_Control *executing = cpu_self->executing;
-     *       Thread_Control *heir = cpu_self->heir;
-     *
-     *       if ( heir != executing ) {
-     *         cpu_self->executing = heir;
-     *         heir_context = (Context_Control *)
-     *           ((uintptr_t) heir + (uintptr_t) executing_context
-     *             - (uintptr_t) executing)
-     *       }
-     *     } while ( test_and_set( &heir_context->is_executing ) );
-     *   }
-     *
-     *   restore( heir_context );
-     * }
-     * @endcode
-     */
     volatile bool is_executing;
 #endif
 } Context_Control;
