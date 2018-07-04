@@ -28,8 +28,7 @@ librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/dev/serial/console-termio
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/dev/serial/console-termios.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/console/console.c
 # timer
-librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/btimer/btimer.c
-librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/btimer/timerisr.c
+librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/dev/btimer/btimer-stub.c
 
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/shared/cache/cache.c
 
