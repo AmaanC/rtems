@@ -3,8 +3,7 @@
  *
  * @brief x86_64 Dependent Source
  *
- * This include file contains information pertaining to the x86_64 / AMD64 / x64
- * processor.
+ * This include file contains information pertaining to the x86_64 processor.
  */
 
 /*
@@ -73,7 +72,12 @@ typedef struct {
   (_context)->rsp
 
 typedef struct {
-  // XXX: MMX, XMM, others?
+  /* XXX: MMX, XMM, others?
+   *
+   * All x87 registers are caller-saved, so callees that make use of the MMX
+   * registers may use the faster femms instruction
+   */
+
   /** FPU registers are listed here */
   double      some_float_register;
 } Context_Control_fp;

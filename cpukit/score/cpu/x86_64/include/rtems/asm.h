@@ -21,19 +21,15 @@
  *  notice.  This file is freely distributable as long as the source
  *  of the file is noted.  This file is:
  *
+ *  COPYRIGHT (c) 2018.
+ *  Amaan Cheval <amaan.cheval@gmail.com>
+ *
  *  COPYRIGHT (c) 1994-2006.
  *  On-Line Applications Research Corporation (OAR).
  */
 
 #ifndef _RTEMS_ASM_H
 #define _RTEMS_ASM_H
-
-/**
- *  @defgroup no_cpuAsm Address Incompatible Flavors Problems
- *
- *  @ingroup no_cpu
- */
-/**@{*/
 
 /*
  *  Indicate we are in an assembly file and get the basic CPU definitions.
@@ -70,8 +66,6 @@
 
 /*
  *  define macros for all of the registers on this CPU
- *
- *  EXAMPLE:     #define d0 REG (d0)
  */
 #define rax REG (rax)
 #define rbx REG (rbx)
@@ -81,8 +75,8 @@
 #define rsi REG (rsi)
 #define rbp REG (rbp)
 #define rsp REG (rsp)
-#define r8 REG (r8)
-#define r9 REG (r9)
+#define r8  REG (r8)
+#define r9  REG (r9)
 #define r10 REG (r10)
 #define r11 REG (r11)
 #define r12 REG (r12)
@@ -90,12 +84,11 @@
 #define r14 REG (r14)
 #define r15 REG (r15)
 
-// XXX: Sizes, segments
+// XXX: eax, ax, etc., segment registers
 
 /*
  *  Define macros to handle section beginning and ends.
  */
-
 
 /** This macro is used to denote the beginning of a code declaration. */
 #define BEGIN_CODE_DCL .text
@@ -138,5 +131,4 @@
  */
 #define EXTERN(sym) .globl SYM (sym)
 
-/**@}*/
 #endif

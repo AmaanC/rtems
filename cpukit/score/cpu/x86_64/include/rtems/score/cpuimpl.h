@@ -5,6 +5,9 @@
  */
 
 /*
+ * Copyright (c) 2018.
+ * Amaan Cheval <amaan.cheval@gmail.com>
+ *
  * Copyright (c) 2013, 2016 embedded brains GmbH
  *
  * The license and distribution terms for this file may be

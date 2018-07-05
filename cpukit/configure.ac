@@ -395,7 +395,6 @@ AM_CONDITIONAL([RPCTOOLS],[test "$RPCGEN" = rpcgen \
 
 # Filter dynamic loading to only build for architectures that have
 # reloc backends
-# XXX: Leaving x86_64 out of libdl and libdebugger
 AC_MSG_CHECKING([whether CPU supports libdl])
 case $RTEMS_CPU in
   arm | i386 | m68k | mips | moxie | powerpc | sparc)
