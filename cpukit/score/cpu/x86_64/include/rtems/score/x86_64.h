@@ -1,3 +1,12 @@
+/*
+ *  COPYRIGHT (c) 2018
+ *  Amaan Cheval <amaan.cheval@gmail.com>
+ *
+ *  The license and distribution terms for this file may be
+ *  found in the file LICENSE in this distribution or at
+ *  http://www.rtems.org/license/LICENSE.
+ */
+
 #ifndef _RTEMS_SCORE_X86_64_H
 #define _RTEMS_SCORE_X86_64_H
 

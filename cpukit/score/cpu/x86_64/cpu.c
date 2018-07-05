@@ -6,7 +6,7 @@
 
 /*
  *  COPYRIGHT (c) 2018.
- *  Amaan Cheval <amaan.cheval@gmail.com>.
+ *  Amaan Cheval <amaan.cheval@gmail.com>
  *
  *  COPYRIGHT (c) 1989-1999.
  *  On-Line Applications Research Corporation (OAR).
