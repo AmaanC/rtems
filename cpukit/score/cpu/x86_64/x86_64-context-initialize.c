@@ -82,7 +82,7 @@ void _CPU_Context_Initialize(
   // XXX: Leaving interrupts off regardless of `new_level` for now
   the_context->rflags = CPU_EFLAGS_INTERRUPTS_OFF;
 
-  _stack  = ((uintptr_t)(stack_area_begin)) + (stack_area_size);
+  _stack  = ((uintptr_t) stack_area_begin) + stack_area_size;
   _stack &= ~(CPU_STACK_ALIGNMENT - 1);
   _stack -= sizeof(uintptr_t); /* fake return address for entry_point's frame;
                                 * this allows rsp+8 to be an aligned boundary */
