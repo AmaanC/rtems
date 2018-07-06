@@ -1,10 +1,7 @@
-/*
- *  COPYRIGHT (c) 2018 Amaan Cheval <amaan.cheval@gmail.com>
- *
- *  The license and distribution terms for this file may be
- *  found in the file LICENSE in this distribution or at
- *  http://www.rtems.org/license/LICENSE.
- */
+/* Copyright (C) 2014-2018 Free Software Foundation, Inc.
+   Copying and distribution of this script, with or without modification,
+   are permitted in any medium without royalty provided the copyright
+   notice and this notice are preserved.  */
 
 /*
  * Copy of default linker script generated with:
@@ -15,11 +12,6 @@
  *   - rtemssroset section
  *   - rtemsstack section
  */
-
-/* Copyright (C) 2014-2018 Free Software Foundation, Inc.
-   Copying and distribution of this script, with or without modification,
-   are permitted in any medium without royalty provided the copyright
-   notice and this notice are preserved.  */
 
 OUTPUT_FORMAT("elf64-x86-64", "elf64-x86-64",
           "elf64-x86-64")
