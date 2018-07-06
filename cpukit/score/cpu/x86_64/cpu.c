@@ -26,17 +26,19 @@
 #include <rtems/score/tls.h>
 
 Context_Control_fp _CPU_Null_fp_context;
-void _CPU_Exception_frame_print(const CPU_Exception_frame *ctx) {}
+
+void _CPU_Exception_frame_print(const CPU_Exception_frame *ctx)
+{
+}
 
 void _CPU_Initialize(void)
 {
 }
 
-uint32_t _CPU_ISR_Get_level( void )
+uint32_t _CPU_ISR_Get_level(void)
 {
   return 0;
 }
-
 
 void _CPU_ISR_install_raw_handler(
   uint32_t    vector,
@@ -54,13 +56,11 @@ void _CPU_ISR_install_vector(
 {
 }
 
-
-void _CPU_Install_interrupt_stack( void )
+void _CPU_Install_interrupt_stack(void)
 {
 }
 
-
-void *_CPU_Thread_Idle_body( uintptr_t ignored )
+void *_CPU_Thread_Idle_body(uintptr_t ignored)
 {
   for( ; ; ) { }
 }
