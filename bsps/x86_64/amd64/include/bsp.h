@@ -44,6 +44,9 @@
 extern "C" {
 #endif
 
+void *clock_driver_sim_idle_body(uintptr_t);
+#define BSP_IDLE_TASK_BODY clock_driver_sim_idle_body
+
 #ifdef __cplusplus
 }
 #endif
