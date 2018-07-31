@@ -24,31 +24,51 @@
  * SUCH DAMAGE.
  */
 
-#ifndef _RTEMS_SCORE_X86_64_H
-#define _RTEMS_SCORE_X86_64_H
+#ifndef _IDT_H
+#define _IDT_H
+
+#include <rtems/score/basedefs.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define CPU_NAME "x86-64"
-#define CPU_MODEL_NAME "XXX: x86-64 generic"
+#define IDT_INTERRUPT_GATE (0b1110)
+#define IDT_TRAP_GATE (0b1111)
+#define IDT_PRESENT (0b10000000)
 
-#define COM1_BASE_IO 0x3F8
-#define COM1_CLOCK_RATE (115200 * 16)
+/*
+ * XXX: The IDT size should be smaller given that we likely won't map all 256
+ * vectors, but for simplicity, this works better.
+ */
+#define IDT_SIZE 256
 
-#define PIC1_DATA 0xa1
-#define PIC2_DATA 0x21
+// XXX
+  typedef struct _interrupt_descriptor {
+    uint16_t offset_0; // bits 0-15
+    uint16_t segment_selector; // a segment selector in the GDT or LDT
+    uint8_t interrupt_stack_table; // Bits 0-2 are the offset into the IST, stored in the TSS
+    uint8_t type_and_attributes;
+    uint16_t offset_1; // bits 16-31
+    uint32_t offset_2; // bits 32-63
+    uint32_t reserved_zero;
+  } interrupt_descriptor;
 
-#define APIC_BASE_MSR 0x1B
-#define APIC_BASE_MSR_ENABLE 0x800
+  // Interrupt Descriptor Table containing all descriptor entries
+  extern interrupt_descriptor amd64_idt[IDT_SIZE];
 
-#define APIC_ID (0x20 >> 2)
-#define APIC_SPURIOUS (0xF0 >> 2)
-#define APIC_SPURIOUS_ENABLE (0x100)
+  struct idt_record {
+    uint16_t  limit;      /* Size of IDT array - 1 */
+    uintptr_t base;       /* Pointer to IDT array  */
+  } RTEMS_PACKED;
+
+  RTEMS_STATIC_ASSERT(sizeof(struct idt_record) == 10, "IDT pointer must be exactly 10 bytes");
+
+  void lidt(struct idt_record *idtr);
+  void init_idt(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _RTEMS_SCORE_X86_64_H */
+#endif

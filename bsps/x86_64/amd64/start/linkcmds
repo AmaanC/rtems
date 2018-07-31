@@ -23,10 +23,10 @@ HeapSize = DEFINED(HeapSize)  ? HeapSize  :
 RamBase = DEFINED(RamBase)    ? RamBase   :
           DEFINED(_RamBase)   ? _RamBase  : 0x0;
 
-/* XXX: Defaulting to 4GiB.
+/* XXX: Defaulting to 1GiB.
  */
 RamSize = DEFINED(RamSize)    ? RamSize   :
-          DEFINED(_RamSize)   ? _RamSize  : 0xFFFFFFFF;
+          DEFINED(_RamSize)   ? _RamSize  : 0x40000000;
 
 SECTIONS
 {
@@ -92,6 +92,13 @@ SECTIONS
     *(.text .stub .text.* .gnu.linkonce.t.*)
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)
+  }
+  .apic_area ALIGN(0x1000):
+  {
+    /* XXX: We'll move the APIC base here. We need 0x400 bytes to allow for all
+     * the APIC registers */
+    APICBase = .;
+    . += 0x400;
   }
   .fini           :
   {

@@ -26,8 +26,12 @@ librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/start/start.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/start/sbrk.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/dev/getentropy/getentropy-cpucounter.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/start/bspreset-empty.c
+# interrupts
+librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/interrupts/idt.c
+# XXX: Needed to use GCC "interrupt" attribute directives
+librtemsbsp_a_CFLAGS = -mgeneral-regs-only
 # clock
-librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/dev/clock/clock-simidle.c
+librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/clock/clock.c
 # console
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/dev/serial/console-termios-init.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/dev/serial/console-termios.c
