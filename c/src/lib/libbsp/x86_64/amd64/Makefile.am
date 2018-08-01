@@ -28,7 +28,9 @@ librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/dev/getentropy/getentropy
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/start/bspreset-empty.c
 # interrupts
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/interrupts/idt.c
-# XXX: Needed to use GCC "interrupt" attribute directives
+librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/irq/irq-default-handler.c
+# XXX: Needed to use GCC "interrupt" attribute directives - may not need after
+# integrating RTEMS interrupt manager
 librtemsbsp_a_CFLAGS = -mgeneral-regs-only
 # clock
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/clock/clock.c
@@ -42,5 +44,6 @@ librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/dev/btimer/btimer-stub.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/cache/nocache.c
 
 include $(top_srcdir)/../../../../automake/local.am
+include $(srcdir)/../../../../../../bsps/shared/irq-sources.am
 include $(srcdir)/../../../../../../bsps/shared/shared-sources.am
 include $(srcdir)/../../../../../../bsps/x86_64/amd64/headers.am

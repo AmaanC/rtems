@@ -29,6 +29,7 @@
 #include <rtems/score/basedefs.h>
 #include <rtems/score/x86_64.h>
 #include <rtems/score/cpuimpl.h>
+#include <bsp/irq-generic.h>
 
 /*
  * The IDT maps every interrupt vector to an interrupt_descriptor based on the vector
@@ -79,20 +80,6 @@ uintptr_t amd64_get_handler_from_idt(uint32_t vector)
   return handler;
 }
 
-struct interrupt_frame {
-  uint64_t xxx_unknown;
-};
-
-void __attribute__((interrupt)) exception_de_handler(struct interrupt_frame *frame)
-{
-  printf("!!! Divide by 0 exception !!!\n");
-}
-
-void __attribute__((interrupt)) exception_generic_handler(struct interrupt_frame *frame, uint64_t error)
-{
-  printf("!!! Generic exception %x !!!\n", error);
-}
-
 void disable_pic(void)
 {
   // Mask all lines on both master and slave PIC to disable
@@ -111,6 +98,20 @@ void amd64_install_interrupt(uint32_t vector, uintptr_t new_handler, uintptr_t *
   amd64_idt[vector] = new_desc;
 }
 
+struct interrupt_frame {
+  uint64_t xxx_unknown;
+};
+
+void __attribute__((interrupt)) exception_de_handler(struct interrupt_frame *frame)
+{
+  printf("!!! Divide by 0 exception !!!\n");
+}
+
+void __attribute__((interrupt)) exception_generic_handler(struct interrupt_frame *frame, uint64_t error)
+{
+  printf("!!! Generic exception %x !!!\n", error);
+}
+
 void init_idt(void)
 {
   // XXX: Test!
@@ -125,4 +126,10 @@ void init_idt(void)
 
   printf("Exception triggered now!");
   printf("%d", 1/0);
+
+  bsp_interrupt_initialize();
 }
+
+void bsp_interrupt_vector_disable(rtems_vector_number vector) {}
+void bsp_interrupt_vector_enable(rtems_vector_number vector) {}
+rtems_status_code bsp_interrupt_facility_initialize(void){}
