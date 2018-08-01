@@ -227,8 +227,6 @@ void _CPU_ISR_install_vector(
   proc_ptr   *old_handler
 );
 
-void _CPU_Install_interrupt_stack( void );
-
 void *_CPU_Thread_Idle_body( uintptr_t ignored );
 
 void _CPU_Context_switch(
