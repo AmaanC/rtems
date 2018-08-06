@@ -106,6 +106,7 @@ typedef struct {
 
 #endif /* ASM */
 
+#endif /* !ASM */
 
 #define CPU_CONTEXT_FP_SIZE sizeof( Context_Control_fp )
 #define CPU_MPCI_RECEIVE_SERVER_EXTRA_STACK 0

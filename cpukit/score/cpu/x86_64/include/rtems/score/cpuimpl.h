@@ -101,6 +101,6 @@ static inline void wrmsr(uint32_t msr, uint32_t low, uint32_t high)
 }
 #endif
 
-#endif /* ASM */
+#endif /* !ASM */
 
 #endif /* _RTEMS_SCORE_CPUIMPL_H */

@@ -46,8 +46,8 @@ BEGIN_CODE
 .p2align  1
 PUBLIC(_CPU_Context_switch)
 
-.set RUNCONTEXT_ARG,   rdi                   /* save context argument */
-.set HEIRCONTEXT_ARG,  rsi                   /* restore context argument */
+.set RUNCONTEXT_ARG,  REG_ARG0   /* save context argument */
+.set HEIRCONTEXT_ARG, REG_ARG1   /* restore context argument */
 
 SYM(_CPU_Context_switch):
   movq    RUNCONTEXT_ARG, rax  /* rax = running threads context */
@@ -88,7 +88,7 @@ restore:
 
 PUBLIC(_CPU_Context_restore)
 
-.set NEWCONTEXT_ARG,   rdi       /* context to restore argument */
+.set NEWCONTEXT_ARG,   REG_ARG0       /* context to restore argument */
 
 SYM(_CPU_Context_restore):
   movq      NEWCONTEXT_ARG, rax  /* rax = running threads context */
