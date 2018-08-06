@@ -24,10 +24,17 @@
  * SUCH DAMAGE.
  */
 
-#include <bsp.h>
-#include <bsp/bootcard.h>
+#include <stdint.h>
+#include <rtems.h>
+#include <idt.h>
+#include <rtems/score/basedefs.h>
+#include <rtems/score/x86_64.h>
+#include <rtems/score/cpuimpl.h>
+#include <bsp/irq-generic.h>
 
-void bsp_start(void)
+void pic_disable(void)
 {
-  bsp_interrupt_initialize();
+  /* Mask all lines on both master and slave PIC to disable */
+  outport_byte(PIC1_DATA, 0xff);
+  outport_byte(PIC2_DATA, 0xff);
 }

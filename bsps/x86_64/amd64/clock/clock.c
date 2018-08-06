@@ -28,6 +28,7 @@
 #include <rtems.h>
 #include <rtems/timecounter.h>
 #include <rtems/score/cpuimpl.h>
+#include <bsp/irq-generic.h>
 
 #define CLOCK_VECTOR 0
 
@@ -101,13 +102,27 @@ void apic_initialize(void)
   apic_base[APIC_SPURIOUS] = APIC_SPURIOUS_ENABLE | 0xFF;
   printf("APIC spurious vector register *%x=%x\n", &apic_base[APIC_SPURIOUS], apic_base[APIC_SPURIOUS]);
 
-  // XXX: Rid of all bound exception handlers as confirmation
-  init_idt();
+  pic_disable();
+  // XXX: Remap IRQs to appropriate interrupt vectors too? Especially spurious
+}
+
+// XXXXXX
+void exception_handler(void* xxx)
+{
+  printf("Exception handler called!");
+}
+
+void test_irq()
+{
+  rtems_status_code sc = rtems_interrupt_handler_install(0, "#de", RTEMS_INTERRUPT_UNIQUE, exception_handler, 0);
+  printf("Handler status=%x\nException triggered now!", sc);
+  printf("%d", 1/0);
 }
 
 // static
 void amd64_clock_initialize(void)
 {
+  test_irq();
   apic_initialize();
 
   amd64_clock_tc.tc_get_timecount = amd64_clock_get_timecount;

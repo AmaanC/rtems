@@ -27,7 +27,9 @@ librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/start/sbrk.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/dev/getentropy/getentropy-cpucounter.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/start/bspreset-empty.c
 # interrupts
+librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/interrupts/pic.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/interrupts/idt.c
+librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/interrupts/isr_handler.S
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/irq/irq-default-handler.c
 # XXX: Needed to use GCC "interrupt" attribute directives - may not need after
 # integrating RTEMS interrupt manager

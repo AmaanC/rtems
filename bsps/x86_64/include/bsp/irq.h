@@ -24,10 +24,18 @@
  * SUCH DAMAGE.
  */
 
-#include <bsp.h>
-#include <bsp/bootcard.h>
+#ifndef LIBBSP_GENERIC_AMD64_IRQ_H
+#define LIBBSP_GENERIC_AMD64_IRQ_H
 
-void bsp_start(void)
-{
-  bsp_interrupt_initialize();
-}
+#ifndef ASM
+
+#include <rtems.h>
+#include <rtems/irq.h>
+#include <rtems/irq-extension.h>
+
+#define BSP_INTERRUPT_VECTOR_MIN  0x0
+#define BSP_IRQ_VECTOR_NUMBER     17
+#define BSP_INTERRUPT_VECTOR_MAX  BSP_IRQ_VECTOR_NUMBER
+
+#endif /* !ASM */
+#endif /* LIBBSP_GENERIC_RISCV_IRQ_H */

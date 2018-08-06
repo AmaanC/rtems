@@ -100,13 +100,52 @@ typedef struct {
   double      some_float_register;
 } Context_Control_fp;
 
+/*
+ * Caller-saved registers for interrupt frames
+ */
 typedef struct {
-    uint32_t   special_interrupt_register;
+  /**
+   * @note: rdi is a caller-saved register too, but it's used in function calls
+   * and is hence saved separately on the stack;
+   *
+   * @see DISTINCT_INTERRUPT_ENTRY
+   * @see _ISR_Handler
+   */
+
+  uint64_t rax;
+  uint64_t rcx;
+  uint64_t rdx;
+  uint64_t rsi;
+  uint64_t r8;
+  uint64_t r9;
+  uint64_t r10;
+  uint64_t r11;
+
+  uint64_t rbp;
+  /*
+   * The rsp just before _ISR_Handler is called; needed because we're not sure
+   * how alignment may move the stack-pointer around.
+   */
+  uint64_t saved_rsp;
+
+  /* XXX:
+   * - FS segment selector for TLS
+   * - x87 SW?
+   * - MMX?
+   * - XMM?
+   */
 } CPU_Interrupt_frame;
 
-#endif /* ASM */
-
 #endif /* !ASM */
+
+#define CPU_INTERRUPT_FRAME_SIZE 80
+
+#ifndef ASM
+  RTEMS_STATIC_ASSERT(
+    sizeof(CPU_Interrupt_frame) == CPU_INTERRUPT_FRAME_SIZE,
+    CPU_INTERRUPT_FRAME_SIZE
+  );
+#endif
 
 #define CPU_CONTEXT_FP_SIZE sizeof( Context_Control_fp )
 #define CPU_MPCI_RECEIVE_SERVER_EXTRA_STACK 0

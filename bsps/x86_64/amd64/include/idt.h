@@ -64,8 +64,30 @@ extern "C" {
 
   RTEMS_STATIC_ASSERT(sizeof(struct idt_record) == 10, "IDT pointer must be exactly 10 bytes");
 
+  void print_idtr(void);
   void lidt(struct idt_record *idtr);
-  void init_idt(void);
+  interrupt_descriptor amd64_create_interrupt_descriptor(uintptr_t handler, uint8_t types_and_attributes);
+  uintptr_t amd64_get_handler_from_idt(uint32_t vector);
+  void amd64_install_interrupt(uint32_t vector, uintptr_t new_handler, uintptr_t *old_handler);
+  void amd64_dispatch_isr(rtems_vector_number vector);
+
+  extern void rtems_irq_prologue_0(void);
+  extern void rtems_irq_prologue_1(void);
+  extern void rtems_irq_prologue_2(void);
+  extern void rtems_irq_prologue_3(void);
+  extern void rtems_irq_prologue_4(void);
+  extern void rtems_irq_prologue_5(void);
+  extern void rtems_irq_prologue_6(void);
+  extern void rtems_irq_prologue_7(void);
+  extern void rtems_irq_prologue_8(void);
+  extern void rtems_irq_prologue_9(void);
+  extern void rtems_irq_prologue_10(void);
+  extern void rtems_irq_prologue_11(void);
+  extern void rtems_irq_prologue_12(void);
+  extern void rtems_irq_prologue_13(void);
+  extern void rtems_irq_prologue_14(void);
+  extern void rtems_irq_prologue_15(void);
+  extern void rtems_irq_prologue_16(void);
 
 #ifdef __cplusplus
 }

@@ -25,6 +25,7 @@
  */
 
 #include <stdint.h>
+#include <rtems.h>
 #include <idt.h>
 #include <rtems/score/basedefs.h>
 #include <rtems/score/x86_64.h>
@@ -42,12 +43,36 @@ struct idt_record idtr = {
   .base = (uintptr_t) amd64_idt
 };
 
+/**
+ * IRQs that the RTEMS Interrupt Manager will manage
+ * @see DISTINCT_INTERRUPT_ENTRY
+ */
+static uintptr_t rtemsIRQs[BSP_IRQ_VECTOR_NUMBER] = {
+  rtems_irq_prologue_0,
+  rtems_irq_prologue_1,
+  rtems_irq_prologue_2,
+  rtems_irq_prologue_3,
+  rtems_irq_prologue_4,
+  rtems_irq_prologue_5,
+  rtems_irq_prologue_6,
+  rtems_irq_prologue_7,
+  rtems_irq_prologue_8,
+  rtems_irq_prologue_9,
+  rtems_irq_prologue_10,
+  rtems_irq_prologue_11,
+  rtems_irq_prologue_12,
+  rtems_irq_prologue_13,
+  rtems_irq_prologue_14,
+  rtems_irq_prologue_15,
+  rtems_irq_prologue_16,
+};
+
 void lidt(struct idt_record *ptr)
 {
   __asm__ volatile ("lidt %0" :: "m"(*ptr));
 }
 
-void sidt(void)
+void print_idtr(void)
 {
   // 2+8 bytes
   uint8_t idtr[10];
@@ -80,13 +105,6 @@ uintptr_t amd64_get_handler_from_idt(uint32_t vector)
   return handler;
 }
 
-void disable_pic(void)
-{
-  // Mask all lines on both master and slave PIC to disable
-  outport_byte(PIC1_DATA, 0xff);
-  outport_byte(PIC2_DATA, 0xff);
-}
-
 void amd64_install_interrupt(uint32_t vector, uintptr_t new_handler, uintptr_t *old_handler)
 {
   // XXX: Locks or ISR disabling?
@@ -98,38 +116,26 @@ void amd64_install_interrupt(uint32_t vector, uintptr_t new_handler, uintptr_t *
   amd64_idt[vector] = new_desc;
 }
 
-struct interrupt_frame {
-  uint64_t xxx_unknown;
-};
-
-void __attribute__((interrupt)) exception_de_handler(struct interrupt_frame *frame)
+void amd64_dispatch_isr(rtems_vector_number vector)
 {
-  printf("!!! Divide by 0 exception !!!\n");
+  printf("Dispatching ISR %x\n", vector);
+  // XXX: Do more processing? Mask?
+  bsp_interrupt_handler_dispatch(vector);
 }
 
-void __attribute__((interrupt)) exception_generic_handler(struct interrupt_frame *frame, uint64_t error)
+rtems_status_code bsp_interrupt_facility_initialize(void)
 {
-  printf("!!! Generic exception %x !!!\n", error);
-}
-
-void init_idt(void)
-{
-  // XXX: Test!
+  // XXX: disable+remap PIC?
   uintptr_t old;
-  amd64_install_interrupt(0, exception_de_handler, &old);
-  printf("exception_de_handler=%x, idt[0]=%x\n", &exception_de_handler, amd64_get_handler_from_idt(0));
-
-  amd64_install_interrupt(8, exception_generic_handler, &old);
+  for(int i = 0; i <= 16; i++) {
+    amd64_install_interrupt(i, rtemsIRQs[i], &old);
+  }
 
   lidt(&idtr);
-  sidt();
+  print_idtr();
 
-  printf("Exception triggered now!");
-  printf("%d", 1/0);
-
-  bsp_interrupt_initialize();
+  return RTEMS_SUCCESSFUL;
 }
 
 void bsp_interrupt_vector_disable(rtems_vector_number vector) {}
 void bsp_interrupt_vector_enable(rtems_vector_number vector) {}
-rtems_status_code bsp_interrupt_facility_initialize(void){}
