@@ -105,7 +105,7 @@ uintptr_t amd64_get_handler_from_idt(uint32_t vector)
   return handler;
 }
 
-void amd64_install_interrupt(uint32_t vector, uintptr_t new_handler, uintptr_t *old_handler)
+void amd64_install_raw_interrupt(uint32_t vector, uintptr_t new_handler, uintptr_t *old_handler)
 {
   // XXX: Locks or ISR disabling?
   *old_handler = amd64_get_handler_from_idt(vector);
@@ -128,7 +128,7 @@ rtems_status_code bsp_interrupt_facility_initialize(void)
   // XXX: disable+remap PIC?
   uintptr_t old;
   for(int i = 0; i <= 16; i++) {
-    amd64_install_interrupt(i, rtemsIRQs[i], &old);
+    amd64_install_raw_interrupt(i, rtemsIRQs[i], &old);
   }
 
   lidt(&idtr);
