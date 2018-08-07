@@ -24,10 +24,11 @@
  * SUCH DAMAGE.
  */
 
-#ifndef _IDT_H
-#define _IDT_H
+#ifndef _AMD64_INTERRUPTS_H
+#define _AMD64_INTERRUPTS_H
 
 #include <rtems/score/basedefs.h>
+#include <rtems/rtems/intr.h>
 
 #ifdef __cplusplus
 extern "C" {

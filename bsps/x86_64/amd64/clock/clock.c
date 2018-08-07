@@ -26,6 +26,7 @@
 
 #include <bsp.h>
 #include <rtems.h>
+#include <rtems/score/interrupts.h>
 #include <rtems/timecounter.h>
 #include <rtems/score/cpuimpl.h>
 #include <bsp/irq-generic.h>
