@@ -96,14 +96,14 @@ void apic_initialize(void)
   );
 
 #if 1
-  printf("APIC is now at %x\n", (uintptr_t) amd64_apic_base);
-  printf("APIC ID at *%x=%x\n", &amd64_apic_base[APIC_APICID], amd64_apic_base[APIC_APICID]);
-  printf("APIC spurious vector register *%x=%x\n", &amd64_apic_base[APIC_SPURIOUS], amd64_apic_base[APIC_SPURIOUS]);
+  printf("APIC is at %x\n", (uintptr_t) amd64_apic_base);
+  printf("APIC ID at *%x=%x\n", &amd64_apic_base[APIC_REGISTER_APICID], amd64_apic_base[APIC_REGISTER_APICID]);
+  printf("APIC spurious vector register *%x=%x\n", &amd64_apic_base[APIC_REGISTER_SPURIOUS], amd64_apic_base[APIC_REGISTER_SPURIOUS]);
 #endif
 
   /* Enable APIC through spurious vector register and map spurious vector
    * number */
-  amd64_apic_base[APIC_SPURIOUS] = APIC_SPURIOUS_ENABLE | BSP_VECTOR_SPURIOUS;
+  amd64_apic_base[APIC_REGISTER_SPURIOUS] = APIC_SPURIOUS_ENABLE | BSP_VECTOR_SPURIOUS;
 
   // XXX: This won't work since raw handlers need to end in iretq - use
   // attribute(interrupt)?
@@ -113,7 +113,7 @@ void apic_initialize(void)
    */
 
 #if 1
-  printf("APIC spurious vector register *%x=%x\n", &amd64_apic_base[APIC_SPURIOUS], amd64_apic_base[APIC_SPURIOUS]);
+  printf("APIC spurious vector register *%x=%x\n", &amd64_apic_base[APIC_REGISTER_SPURIOUS], amd64_apic_base[APIC_REGISTER_SPURIOUS]);
 #endif
 
   /*
@@ -132,7 +132,7 @@ void xxx_apic_isr(void)
 {
   Clock_isr(NULL);
   // XXX: Should be in ISR_Handler?
-  amd64_apic_base[APIC_EOI] = 0;
+  amd64_apic_base[APIC_REGISTER_EOI] = APIC_EOI_ACK;
 }
 
 uint64_t apic_timer_initialize(uint64_t irq_ticks_per_sec)

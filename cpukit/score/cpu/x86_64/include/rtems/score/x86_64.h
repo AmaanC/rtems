@@ -84,13 +84,13 @@ extern "C" {
  */
 #define APIC_OFFSET(val) (val >> 2)
 
-#define APIC_APICID       APIC_OFFSET(0x20)
+#define APIC_REGISTER_APICID       APIC_OFFSET(0x20)
 #define APIC_APICVER      APIC_OFFSET(0x30)
 #define APIC_TASKPRIOR    APIC_OFFSET(0x80)
-#define APIC_EOI          APIC_OFFSET(0x0B0)
+#define APIC_REGISTER_EOI          APIC_OFFSET(0x0B0)
 #define APIC_LDR          APIC_OFFSET(0x0D0)
 #define APIC_DFR          APIC_OFFSET(0x0E0)
-#define APIC_SPURIOUS     APIC_OFFSET(0x0F0)
+#define APIC_REGISTER_SPURIOUS     APIC_OFFSET(0x0F0)
 #define APIC_ESR          APIC_OFFSET(0x280)
 #define APIC_ICRL         APIC_OFFSET(0x300)
 #define APIC_ICRH         APIC_OFFSET(0x310)
@@ -105,6 +105,7 @@ extern "C" {
 #define APIC_LAST         APIC_OFFSET(0x38F)
 
 #define APIC_DISABLE         0x10000
+#define APIC_EOI_ACK         0
 #define APIC_SELECT_TMR_PERIODIC    0x20000
 #define APIC_NMI             (4<<8)
 #define APIC_TMR_BASEDIV     (1<<20)
