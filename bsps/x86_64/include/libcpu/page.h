@@ -24,18 +24,28 @@
  * SUCH DAMAGE.
  */
 
-#ifndef LIBBSP_GENERIC_AMD64_IRQ_H
-#define LIBBSP_GENERIC_AMD64_IRQ_H
+#ifndef _LIBCPU_AMD64_PAGE_H
+#define _LIBCPU_AMD64_PAGE_H
 
 #ifndef ASM
 
-#include <rtems.h>
-#include <rtems/irq.h>
-#include <rtems/irq-extension.h>
+#define NUM_PAGE_TABLE_ENTRIES 512
 
-#define BSP_INTERRUPT_VECTOR_MIN  0x0
-#define BSP_IRQ_VECTOR_NUMBER     33
-#define BSP_INTERRUPT_VECTOR_MAX  BSP_IRQ_VECTOR_NUMBER
+extern uint64_t amd64_pml4[NUM_PAGE_TABLE_ENTRIES];
+extern uint64_t amd64_pdpt[NUM_PAGE_TABLE_ENTRIES];
+
+#define PAGE_FLAGS_PRESENT          (1 << 0)
+#define PAGE_FLAGS_WRITABLE         (1 << 1)
+#define PAGE_FLAGS_USER_ACCESSIBLE  (1 << 2)
+#define PAGE_FLAGS_WRITE_THROUGH    (1 << 3)
+#define PAGE_FLAGS_NO_CACHE         (1 << 4)
+#define PAGE_FLAGS_ACCESSED         (1 << 5)
+#define PAGE_FLAGS_DIRTY            (1 << 6)
+#define PAGE_FLAGS_HUGE_PAGE        (1 << 7)
+#define PAGE_FLAGS_GLOBAL           (1 << 8)
+#define PAGE_FLAGS_NO_EXECUTE       (1 << 63)
+
+#define PAGE_FLAGS_DEFAULTS (PAGE_FLAGS_PRESENT | PAGE_FLAGS_WRITABLE | PAGE_FLAGS_USER_ACCESSIBLE | PAGE_FLAGS_WRITE_THROUGH | PAGE_FLAGS_NO_CACHE | PAGE_FLAGS_GLOBAL)
 
 #endif /* !ASM */
-#endif /* LIBBSP_GENERIC_RISCV_IRQ_H */
+#endif

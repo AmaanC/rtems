@@ -26,8 +26,10 @@
 
 #include <bsp.h>
 #include <bsp/bootcard.h>
+#include <libcpu/page.h>
 
 void bsp_start(void)
 {
+  paging_init();
   bsp_interrupt_initialize();
 }

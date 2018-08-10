@@ -68,16 +68,20 @@ static inline uint16_t amd64_get_cs(void)
 {
   uint16_t segment = 0;
 
-  __asm__ volatile ( "movw %%cs,%0" : "=r" (segment) : "0" (segment) );
+  __asm__ volatile ( "movw %%cs, %0" : "=r" (segment) : "0" (segment) );
 
   return segment;
+}
+
+static inline void amd64_set_cr3(uint64_t segment)
+{
+  __asm__ volatile ( "movq %0, %%cr3" : "=r" (segment) : "0" (segment) );
 }
 
 static inline void cpuid(int code, uint32_t *eax, uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
   __asm__ volatile ( "cpuid"
                      : "=a" (*eax), "=b" (*ebx), "=c" (*ecx), "=d" (*edx)
                      : "a" (code) );
-  printf("cpuid: eax=%x ebx=%x ecx=%x edx=%x\n", *eax, *ebx, *ecx, *edx);
 }
 
 static inline uint64_t rdmsr(uint32_t msr)
@@ -86,8 +90,6 @@ static inline uint64_t rdmsr(uint32_t msr)
   __asm__ volatile ( "rdmsr" :
                      "=a" (low), "=d" (high) :
                      "c" (msr) );
-   // XXX: Remove
-   printf("MSR=%x %x\n", low, high);
    return low | (uint64_t) high << 32;
 }
 
@@ -97,6 +99,14 @@ static inline void wrmsr(uint32_t msr, uint32_t low, uint32_t high)
                      "a" (low), "d" (high), "c" (msr) );
 }
 
+static inline void amd64_enable_interrupts(void)
+{
+  __asm__ volatile ( "sti" );
+}
+static inline void amd64_disable_interrupts(void)
+{
+  __asm__ volatile ( "cli" );
+}
 #ifdef __cplusplus
 }
 #endif

@@ -65,6 +65,22 @@ static uintptr_t rtemsIRQs[BSP_IRQ_VECTOR_NUMBER] = {
   rtems_irq_prologue_14,
   rtems_irq_prologue_15,
   rtems_irq_prologue_16,
+  rtems_irq_prologue_17,
+  rtems_irq_prologue_18,
+  rtems_irq_prologue_19,
+  rtems_irq_prologue_20,
+  rtems_irq_prologue_21,
+  rtems_irq_prologue_22,
+  rtems_irq_prologue_23,
+  rtems_irq_prologue_24,
+  rtems_irq_prologue_25,
+  rtems_irq_prologue_26,
+  rtems_irq_prologue_27,
+  rtems_irq_prologue_28,
+  rtems_irq_prologue_29,
+  rtems_irq_prologue_30,
+  rtems_irq_prologue_31,
+  rtems_irq_prologue_32,
 };
 
 void lidt(struct idt_record *ptr)
@@ -118,7 +134,7 @@ void amd64_install_raw_interrupt(uint32_t vector, uintptr_t new_handler, uintptr
 
 void amd64_dispatch_isr(rtems_vector_number vector)
 {
-  printf("Dispatching ISR %x\n", vector);
+//  printf("Dispatching ISR %x\n", vector);
   // XXX: Do more processing? Mask?
   bsp_interrupt_handler_dispatch(vector);
 }
@@ -127,7 +143,7 @@ rtems_status_code bsp_interrupt_facility_initialize(void)
 {
   // XXX: disable+remap PIC?
   uintptr_t old;
-  for(int i = 0; i <= 16; i++) {
+  for(int i = 0; i <= BSP_IRQ_VECTOR_NUMBER; i++) {
     amd64_install_raw_interrupt(i, rtemsIRQs[i], &old);
   }
 

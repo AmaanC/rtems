@@ -80,7 +80,7 @@ void _CPU_Context_Initialize(
   (void) tls_area;
 
   // XXX: Leaving interrupts off regardless of `new_level` for now
-  the_context->rflags = CPU_EFLAGS_INTERRUPTS_OFF;
+  the_context->rflags = CPU_EFLAGS_INTERRUPTS_ON;
 
   _stack  = ((uintptr_t) stack_area_begin) + stack_area_size;
   _stack &= ~(CPU_STACK_ALIGNMENT - 1);

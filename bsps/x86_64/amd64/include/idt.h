@@ -24,11 +24,10 @@
  * SUCH DAMAGE.
  */
 
-#ifndef _AMD64_INTERRUPTS_H
-#define _AMD64_INTERRUPTS_H
+#ifndef _IDT_H
+#define _IDT_H
 
 #include <rtems/score/basedefs.h>
-#include <rtems/rtems/intr.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,11 +42,6 @@ extern "C" {
  * vectors, but for simplicity, this works better.
  */
 #define IDT_SIZE 256
-
-/* Target vector number for spurious IRQs */
-#define BSP_VECTOR_SPURIOUS 0xFF
-/* Target vector number for the APIC timer */
-#define BSP_VECTOR_APIC_TIMER 32
 
 // XXX
   typedef struct _interrupt_descriptor {
@@ -74,7 +68,7 @@ extern "C" {
   void lidt(struct idt_record *idtr);
   interrupt_descriptor amd64_create_interrupt_descriptor(uintptr_t handler, uint8_t types_and_attributes);
   uintptr_t amd64_get_handler_from_idt(uint32_t vector);
-  void amd64_install_raw_interrupt(uint32_t vector, uintptr_t new_handler, uintptr_t *old_handler);
+  void amd64_install_interrupt(uint32_t vector, uintptr_t new_handler, uintptr_t *old_handler);
   void amd64_dispatch_isr(rtems_vector_number vector);
 
   extern void rtems_irq_prologue_0(void);

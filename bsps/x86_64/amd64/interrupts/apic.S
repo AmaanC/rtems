@@ -1,4 +1,9 @@
 /*
+ * This file contains the _ISR_Handler that acts as the common handler for all
+ * vectors to be managed by the RTEMS interrupt manager.
+ */
+
+/*
  * Copyright (c) 2018.
  * Amaan Cheval <amaan.cheval@gmail.com>
  *
@@ -24,18 +29,29 @@
  * SUCH DAMAGE.
  */
 
-#ifndef LIBBSP_GENERIC_AMD64_IRQ_H
-#define LIBBSP_GENERIC_AMD64_IRQ_H
+#include <rtems/asm.h>
+#include <rtems/score/cpu.h>
+#include <rtems/score/percpu.h>
 
-#ifndef ASM
+#ifndef CPU_STACK_ALIGNMENT
+#error "Missing header? CPU_STACK_ALIGNMENT not defined"
+#endif
 
-#include <rtems.h>
-#include <rtems/irq.h>
-#include <rtems/irq-extension.h>
+BEGIN_CODE
 
-#define BSP_INTERRUPT_VECTOR_MIN  0x0
-#define BSP_IRQ_VECTOR_NUMBER     33
-#define BSP_INTERRUPT_VECTOR_MAX  BSP_IRQ_VECTOR_NUMBER
+PUBLIC(apic_spurious_handler)
+SYM(apic_spurious_handler):
+  iretq
 
-#endif /* !ASM */
-#endif /* LIBBSP_GENERIC_RISCV_IRQ_H */
+.set APIC_EOI_OFFSET, 0x0b0
+PUBLIC(apic_dummy_timer)
+SYM(apic_dummy_timer):
+  push rax
+  movq $SYM(amd64_apic_base), rax
+  movq $0, APIC_EOI_OFFSET(rax)
+  pop  rax
+  iretq
+
+END_CODE
+
+END

@@ -23,17 +23,16 @@ librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/start/bspfatal-default.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/start/bspgetworkarea-default.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/start/bspstart.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/start/start.c
+librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/start/page.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/start/sbrk.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/dev/getentropy/getentropy-cpucounter.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/start/bspreset-empty.c
 # interrupts
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/interrupts/pic.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/interrupts/idt.c
+librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/interrupts/apic.S
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/interrupts/isr_handler.S
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/irq/irq-default-handler.c
-# XXX: Needed to use GCC "interrupt" attribute directives - may not need after
-# integrating RTEMS interrupt manager
-librtemsbsp_a_CFLAGS = -mgeneral-regs-only
 # clock
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/clock/clock.c
 # console
