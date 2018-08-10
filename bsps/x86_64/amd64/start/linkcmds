@@ -83,13 +83,6 @@ SECTIONS
   .plt            : { *(.plt) *(.iplt) }
 .plt.got        : { *(.plt.got) }
 .plt.sec        : { *(.plt.sec) }
-  .apic_area ALIGN(0x1000):
-  {
-    /* XXX: We'll move the APIC base here. We need 0x400 bytes to allow for all
-     * the APIC registers */
-    APICBase = .;
-    . += 0x400;
-  }
   .text           :
   {
     *(.text.unlikely .text.*_unlikely .text.unlikely.*)

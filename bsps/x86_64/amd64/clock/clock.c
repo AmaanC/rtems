@@ -73,53 +73,27 @@ bool has_apic_support() {
   return (edx >> 9) & 1;
 }
 
-// Space reserved for APIC in linker script
-extern char APICBase[];
-
-// XXX: Should take args
-void relocate_apic()
-{
-  /*
-   * XXX: FreeBSD maps the first 1 GiB of physical memory to all 1 GiB of
-   * virtual memory. This means that we need to move the APIC base to the first
-   * 1 GiB of physical memory.
-   *
-   * The linker script's virtual address may not be good enough for us, since
-   * what we write to the MSR is the physical address.
-   * So let's make sure its within the first 1 GiB.
-   */
-
-  // Page-aligned and within first 1 GiB
-  uint32_t new_apic_base = (uintptr_t) APICBase & 0x3ffff000;
-  uint32_t low = (new_apic_base & 0xfffff000) | APIC_BASE_MSR_ENABLE;
-  // uint32_t high = (new_apic_base >> 32) & 0xf0;
-  uint32_t high = 0;
-#if 1
-  printf("Relocating APIC to 0x%x\n", low);
-#endif
-
-  // Relocate APIC
-  wrmsr(APIC_BASE_MSR, low, high);
-}
-
 void apic_initialize(void)
 {
   /*
-   * APIC base is a 36-bit physical address.
+   * The APIC base address is a 36-bit physical address.
+   * We have identity-paging setup at the moment, which makes this simpler, but
+   * that's something to note since the variables below use virtual addresses.
    *
    * Bits 0-11 (inclusive) are 0, making the address page (4KiB) aligned.
    * Bits 12-35 (inclusive) of the MSR point to the rest of the address.
    */
-  amd64_apic_base = (uint32_t*) rdmsr(APIC_BASE_MSR);
+  uint64_t apic_base_msr = rdmsr(APIC_BASE_MSR);
+  // XXX: Needs to be global?
+  amd64_apic_base = (uint32_t*) apic_base_msr;
   amd64_apic_base = (uintptr_t) amd64_apic_base & 0x0ffffff000;
-  printf("APIC was at %x\n", (uintptr_t) amd64_apic_base);
 
-  // XXX: Skipping APIC relocation because QEMU seems to fail if we do
-  // relocate_apic();
-  // XXX: Set bit 11 of amd64_apic_base_msr to hardware enable? Done above
-
-  amd64_apic_base = (uint32_t*) rdmsr(APIC_BASE_MSR);
-  amd64_apic_base = (uintptr_t) amd64_apic_base & 0x0ffffff000;
+  /* Hardware enable the APIC just to be sure */
+  wrmsr(
+    APIC_BASE_MSR,
+    apic_base_msr | APIC_BASE_MSR_ENABLE,
+    apic_base_msr >> 32
+  );
 
 #if 1
   printf("APIC is now at %x\n", (uintptr_t) amd64_apic_base);
