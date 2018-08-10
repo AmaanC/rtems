@@ -39,9 +39,14 @@
 
 BEGIN_CODE
 
+PUBLIC(apic_spurious_handler)
+SYM(apic_spurious_handler):
+  iretq
+
 /*
  * rbx is a callee-saved register, which means we can use it in our interrupt,
- * persisted through function calls, as long as we also save and restore it.
+ * as a persistent scratch register (i.e. calls will not destroy it), as long as
+ * we also save and restore it for the interrupted task.
  */
 .set SCRATCH_REG, rbx
 
@@ -51,10 +56,10 @@ BEGIN_CODE
  */
 #define DISTINCT_INTERRUPT_ENTRY(vector)   \
   .p2align 4                             ; \
-  PUBLIC(rtems_irq_prologue_ ## vector) ; \
-SYM(rtems_irq_prologue_ ## vector):     ; \
+  PUBLIC(rtems_irq_prologue_ ## vector)  ; \
+SYM(rtems_irq_prologue_ ## vector):      ; \
   pushq REG_ARG0                         ; \
-  mov   $vector, REG_ARG0                ; \
+  movq   $vector, REG_ARG0               ; \
   pushq SCRATCH_REG                      ; \
   jmp   SYM(_ISR_Handler)                ; \
 

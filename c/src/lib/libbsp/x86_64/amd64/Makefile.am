@@ -30,7 +30,6 @@ librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/start/bspreset-empty.c
 # interrupts
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/interrupts/pic.c
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/interrupts/idt.c
-librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/interrupts/apic.S
 librtemsbsp_a_SOURCES += ../../../../../../bsps/x86_64/amd64/interrupts/isr_handler.S
 librtemsbsp_a_SOURCES += ../../../../../../bsps/shared/irq/irq-default-handler.c
 # clock
