@@ -67,7 +67,8 @@ static uint32_t amd64_clock_get_timecount(struct timecounter *tc)
  * register, bit 9 of the CPUID feature flags returned in the EDX register
  * indicates the presence (set) or absence (clear) of a local APIC.
  */
-bool has_apic_support() {
+bool has_apic_support()
+{
   uint32_t eax, ebx, ecx, edx;
   cpuid(1, &eax, &ebx, &ecx, &edx);
   return (edx >> 9) & 1;
@@ -75,6 +76,10 @@ bool has_apic_support() {
 
 void apic_initialize(void)
 {
+  if (!has_apic_support()) {
+    printf("cpuid claims no APIC support; trying anyway.\n");
+  }
+
   /*
    * The APIC base address is a 36-bit physical address.
    * We have identity-paging setup at the moment, which makes this simpler, but
@@ -98,19 +103,16 @@ void apic_initialize(void)
 #if 1
   printf("APIC is at %x\n", (uintptr_t) amd64_apic_base);
   printf("APIC ID at *%x=%x\n", &amd64_apic_base[APIC_REGISTER_APICID], amd64_apic_base[APIC_REGISTER_APICID]);
+
   printf("APIC spurious vector register *%x=%x\n", &amd64_apic_base[APIC_REGISTER_SPURIOUS], amd64_apic_base[APIC_REGISTER_SPURIOUS]);
 #endif
 
-  /* Enable APIC through spurious vector register and map spurious vector
-   * number */
-  amd64_apic_base[APIC_REGISTER_SPURIOUS] = APIC_SPURIOUS_ENABLE | BSP_VECTOR_SPURIOUS;
-
-  // XXX: This won't work since raw handlers need to end in iretq - use
-  // attribute(interrupt)?
   /*
-   * uintptr_t old;
-   * amd64_install_raw_interrupt(BSP_VECTOR_SPURIOUS, apic_spurious_handler, &old);
+   * Software enable the APIC by mapping spurious vector and setting enable bit.
    */
+  uintptr_t old;
+  amd64_install_raw_interrupt(BSP_VECTOR_SPURIOUS, apic_spurious_handler, &old);
+  amd64_apic_base[APIC_REGISTER_SPURIOUS] = APIC_SPURIOUS_ENABLE | BSP_VECTOR_SPURIOUS;
 
 #if 1
   printf("APIC spurious vector register *%x=%x\n", &amd64_apic_base[APIC_REGISTER_SPURIOUS], amd64_apic_base[APIC_REGISTER_SPURIOUS]);
@@ -120,7 +122,7 @@ void apic_initialize(void)
    * The PIC may send spurious IRQs even when disabled, and without remapping
    * IRQ7 would look like an exception.
    */
-  pic_remap(0x20, 0x28);
+  pic_remap(PIC1_REMAP_DEST, PIC2_REMAP_DEST);
   pic_disable();
 }
 
@@ -137,10 +139,6 @@ void xxx_apic_isr(void)
 
 uint64_t apic_timer_initialize(uint64_t irq_ticks_per_sec)
 {
-  uintptr_t old;
-  // XXX: Enable spurious register here too?
-  amd64_install_raw_interrupt(BSP_VECTOR_SPURIOUS, apic_spurious_handler, &old);
-
   // XXX: Should be Clock_driver_support_install_isr?
   rtems_status_code sc = rtems_interrupt_handler_install(
     BSP_VECTOR_APIC_TIMER,
