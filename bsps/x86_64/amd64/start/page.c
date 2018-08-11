@@ -74,6 +74,7 @@ uint64_t get_mask_for_bits(uint8_t start, uint8_t end)
    *   get_mask_for_bits(48, 64) = 0xffff000000000000
    */
   uint64_t mask = (((uint64_t) 1 << (end - start)) - 1) << start;
+  return mask;
 }
 
 static inline void assert_0s_from_bit(uint64_t entry, uint8_t bit_pos)
