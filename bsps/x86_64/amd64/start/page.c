@@ -43,8 +43,9 @@
 
 bool paging_1gib_pages_supported(void)
 {
-  /* If CPUID.80000001H:EDX.Page1GB [bit 26] = 1, 1-GByte pages are supported
-   * with 4-level paging
+  /*
+   * If CPUID.80000001H:EDX.Page1GB [bit 26] = 1, 1-GByte pages are supported
+   * with 4-level paging.
    */
   uint32_t a, b, c, d;
   cpuid(0x80000001, &a, &b, &c, &d);
@@ -53,10 +54,11 @@ bool paging_1gib_pages_supported(void)
 
 uint8_t get_maxphysaddr(void)
 {
-  /* CPUID.80000008H:EAX[15:8] reports the linear-address width supported by the
+  /*
+   * CPUID.80000008H:EAX[15:8] reports the linear-address width supported by the
    * processor. Generally, this value is 48 if CPUID.80000001H:EDX.LM [bit 29] =
    * 1 and 32 otherwise.
-  */
+   */
   uint32_t a, b, c, d;
   cpuid(0x80000008, &a, &b, &c, &d);
 
@@ -69,7 +71,8 @@ uint8_t get_maxphysaddr(void)
 
 uint64_t get_mask_for_bits(uint8_t start, uint8_t end)
 {
-  /* Create a mask that lets you select bits start:end when logically ANDed with
+  /*
+   * Create a mask that lets you select bits start:end when logically ANDed with
    * a value. For eg.
    *   get_mask_for_bits(48, 64) = 0xffff000000000000
    */
@@ -100,9 +103,11 @@ uint64_t create_pml4_entry(uint64_t phys_addr, uint8_t maxphysaddr, uint64_t fla
   assert((phys_addr & 0xfff) == 0);
   uint64_t entry = (phys_addr & get_mask_for_bits(12, maxphysaddr)) | flags;
 
-  /* Confirm that bits maxphysaddr:64 are 0s; there are other usable bits there
+  /*
+   * Confirm that bits maxphysaddr:64 are 0s; there are other usable bits there
    * such as PAGE_FLAGS_NO_EXECUTE, but we're asserting that those aren't set
-   * either. */
+   * either.
+   */
   assert_0s_from_bit(entry, maxphysaddr);
   return entry;
 }
@@ -113,9 +118,11 @@ uint64_t create_pdpt_entry(uint64_t phys_addr, uint8_t maxphysaddr, uint64_t fla
   assert((phys_addr & 0x3fffffff) == 0);
   uint64_t entry = (phys_addr & get_mask_for_bits(30, maxphysaddr)) | flags;
 
-  /* Confirm that bits maxphysaddr:64 are 0s; there are other usable bits there
+  /*
+   * Confirm that bits maxphysaddr:64 are 0s; there are other usable bits there
    * such as the protection key and PAGE_FLAGS_NO_EXECUTE, but we're asserting
-   * that those aren't set either. */
+   * that those aren't set either.
+   */
   assert_0s_from_bit(entry, maxphysaddr);
   return entry;
 }
@@ -149,5 +156,5 @@ void paging_init(void)
     );
   }
 
-  amd64_set_cr3(create_cr3_entry(amd64_pml4, maxphysaddr, PAGE_FLAGS_WRITE_THROUGH));
+  amd64_set_cr3(create_cr3_entry((uint64_t) &amd64_pml4, maxphysaddr, PAGE_FLAGS_WRITE_THROUGH));
 }
