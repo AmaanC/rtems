@@ -124,15 +124,11 @@ uint64_t amd64_pdpt[NUM_PAGE_TABLE_ENTRIES] RTEMS_ALIGNED(4096);
 
 void paging_init(void)
 {
-  printf("Filling %d page tables\n", NUM_PAGE_TABLE_ENTRIES);
-
   if ( !paging_1gib_pages_supported() ) {
-    printf("1gib pages not supported!\n");
+    printf("1gib pages not supported, trying anyway.\n");
   }
   const uint8_t maxphysaddr = get_maxphysaddr();
-#if 1
-  printf("maxphysaddr = %d\n", maxphysaddr);
-#endif
+  DBG_PRINTF("maxphysaddr = %d\n", maxphysaddr);
 
   const uint64_t gib = (1 << 30);
 

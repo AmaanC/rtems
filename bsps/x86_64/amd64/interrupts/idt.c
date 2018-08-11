@@ -33,8 +33,8 @@
 #include <bsp/irq-generic.h>
 
 /*
- * The IDT maps every interrupt vector to an interrupt_descriptor based on the vector
- * number
+ * The IDT maps every interrupt vector to an interrupt_descriptor based on the
+ * vector number.
  */
 interrupt_descriptor amd64_idt[IDT_SIZE] RTEMS_ALIGNED(8) = { { 0 } };
 
@@ -88,18 +88,6 @@ void lidt(struct idt_record *ptr)
   __asm__ volatile ("lidt %0" :: "m"(*ptr));
 }
 
-void print_idtr(void)
-{
-  // 2+8 bytes
-  uint8_t idtr[10];
-  __asm__ volatile ("sidt %0" :: "m"(idtr));
-  printf("sidt = ");
-  for(int i = 0; i < 10; i++) {
-    printf("%x ", idtr[i]);
-  }
-  printf("\n");
-}
-
 interrupt_descriptor amd64_create_interrupt_descriptor(uintptr_t handler, uint8_t types_and_attributes)
 {
   interrupt_descriptor entry = {
@@ -123,7 +111,6 @@ uintptr_t amd64_get_handler_from_idt(uint32_t vector)
 
 void amd64_install_raw_interrupt(uint32_t vector, uintptr_t new_handler, uintptr_t *old_handler)
 {
-  // XXX: Locks or ISR disabling?
   *old_handler = amd64_get_handler_from_idt(vector);
   interrupt_descriptor new_desc = amd64_create_interrupt_descriptor(
     new_handler,
@@ -134,21 +121,17 @@ void amd64_install_raw_interrupt(uint32_t vector, uintptr_t new_handler, uintptr
 
 void amd64_dispatch_isr(rtems_vector_number vector)
 {
-//  printf("Dispatching ISR %x\n", vector);
-  // XXX: Do more processing? Mask?
   bsp_interrupt_handler_dispatch(vector);
 }
 
 rtems_status_code bsp_interrupt_facility_initialize(void)
 {
-  // XXX: disable+remap PIC?
   uintptr_t old;
   for(int i = 0; i <= BSP_IRQ_VECTOR_NUMBER; i++) {
     amd64_install_raw_interrupt(i, rtemsIRQs[i], &old);
   }
 
   lidt(&idtr);
-  print_idtr();
 
   return RTEMS_SUCCESSFUL;
 }
