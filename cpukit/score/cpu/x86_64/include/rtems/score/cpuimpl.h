@@ -103,9 +103,17 @@ static inline void amd64_enable_interrupts(void)
 {
   __asm__ volatile ( "sti" );
 }
+
 static inline void amd64_disable_interrupts(void)
 {
   __asm__ volatile ( "cli" );
+}
+
+static inline void stub_io_wait(void)
+{
+  /* XXX: This likely won't be required on any modern boards, but this function
+   * exists so it's easier to find all the places it may be used.
+   */
 }
 #ifdef __cplusplus
 }

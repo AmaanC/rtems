@@ -32,6 +32,7 @@
 #include <rtems/score/cpuimpl.h>
 #include <bsp/irq-generic.h>
 
+// XXX: Make pic.h
 #define PIC1          0x20  /* IO base address for master PIC */
 #define PIC2          0xA0  /* IO base address for slave PIC */
 #define PIC1_COMMAND  PIC1
@@ -54,11 +55,6 @@
 #define ICW4_BUF_MASTER 0x0C  /* Buffered mode/master */
 #define ICW4_SFNM       0x10  /* Special fully nested (not) */
 
-void io_wait(void)
-{
-  /* XXX: This likely won't be required on any modern boards */
-}
-
 void pic_remap(int offset1, int offset2)
 {
   uint8_t a1, a2;
@@ -69,26 +65,26 @@ void pic_remap(int offset1, int offset2)
 
   /* starts the initialization sequence (in cascade mode) */
   outport_byte(PIC1_COMMAND, ICW1_INIT+ICW1_ICW4);
-  io_wait();
+  stub_io_wait();
   outport_byte(PIC2_COMMAND, ICW1_INIT+ICW1_ICW4);
-  io_wait();
+  stub_io_wait();
   /* ICW2: Master PIC vector offset */
   outport_byte(PIC1_DATA, offset1);
-  io_wait();
+  stub_io_wait();
   /* ICW2: Slave PIC vector offset */
   outport_byte(PIC2_DATA, offset2);
-  io_wait();
+  stub_io_wait();
   /* ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100) */
   outport_byte(PIC1_DATA, 4);
-  io_wait();
+  stub_io_wait();
   /* ICW3: tell Slave PIC its cascade identity (0000 0010) */
   outport_byte(PIC2_DATA, 2);
-  io_wait();
+  stub_io_wait();
 
   outport_byte(PIC1_DATA, ICW4_8086);
-  io_wait();
+  stub_io_wait();
   outport_byte(PIC2_DATA, ICW4_8086);
-  io_wait();
+  stub_io_wait();
 
   /* restore saved masks. */
   outport_byte(PIC1_DATA, a1);

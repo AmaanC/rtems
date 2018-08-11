@@ -40,6 +40,10 @@ extern "C" {
 #define PIC1_DATA                 0xa1
 #define PIC2_DATA                 0x21
 
+/* This remaps IRQ0 to vector number 0x20 and so on (i.e. IDT[32]) */
+#define PIC1_REMAP_DEST           0x20
+#define PIC2_REMAP_DEST           0x28
+
 #define PIT_FREQUENCY             1193180
 /*
  * The PIT_FREQUENCY determines how many times the PIT counter is decremented

@@ -34,31 +34,16 @@
 #include <rtems/score/x86_64.h>
 #include <bsp/irq-generic.h>
 
-#ifndef CPU_NAME
-#error "Missing x86_64.h"
-#endif
-
 /* Use the amd64_apic_base as a pointer into an array of 32-bit APIC registers */
 uint32_t *amd64_apic_base;
-
 static struct timecounter amd64_clock_tc;
+
 extern volatile uint32_t Clock_driver_ticks;
+extern void apic_spurious_handler(void);
+extern void Clock_isr(void *param);
 
 static uint32_t amd64_clock_get_timecount(struct timecounter *tc)
 {
-  /*
-   * uint32_t irqs = Clock_driver_ticks;
-   * uint64_t us_per_tick = rtems_configuration_get_microseconds_per_tick();
-   *
-   * uint32_t completed_already = irqs * us_per_tick;
-   * uint32_t currently_running =
-   *   (double) amd64_apic_base[APIC_REGISTER_TIMER_CURRCNT] /
-   *   amd64_apic_base[APIC_REGISTER_TIMER_INITCNT] *
-   *   us_per_tick;
-   *
-   * return completed_already + currently_running;
-   */
-  // XXX: Return how many IRQs have occurred
   return Clock_driver_ticks;
 }
 
@@ -74,6 +59,11 @@ bool has_apic_support()
   return (edx >> 9) & 1;
 }
 
+/*
+ * Initializes the APIC by hardware and software enabling it, and sets up the
+ * amd64_apic_base pointer that can be used as a 32-bit addressable array to
+ * access APIC registers.
+ */
 void apic_initialize(void)
 {
   if (!has_apic_support()) {
@@ -89,7 +79,6 @@ void apic_initialize(void)
    * Bits 12-35 (inclusive) of the MSR point to the rest of the address.
    */
   uint64_t apic_base_msr = rdmsr(APIC_BASE_MSR);
-  // XXX: Needs to be global?
   amd64_apic_base = (uint32_t*) apic_base_msr;
   amd64_apic_base = (uintptr_t) amd64_apic_base & 0x0ffffff000;
 
@@ -126,29 +115,27 @@ void apic_initialize(void)
   pic_disable();
 }
 
-void apic_spurious_handler(void);
-void apic_dummy_timer(void);
-void Clock_isr(void *param);
-
-void xxx_apic_isr(void)
+void apic_isr(void *param)
 {
-  Clock_isr(NULL);
-  // XXX: Should be in ISR_Handler?
+  Clock_isr(param);
   amd64_apic_base[APIC_REGISTER_EOI] = APIC_EOI_ACK;
+}
+
+void apic_timer_install_handler(void)
+{
+  rtems_status_code sc = rtems_interrupt_handler_install(
+    BSP_VECTOR_APIC_TIMER,
+    "APIC timer",
+    RTEMS_INTERRUPT_UNIQUE,
+    apic_isr,
+    NULL
+  );
+  assert(sc == RTEMS_SUCCESSFUL);
 }
 
 uint64_t apic_timer_initialize(uint64_t irq_ticks_per_sec)
 {
-  // XXX: Should be Clock_driver_support_install_isr?
-  rtems_status_code sc = rtems_interrupt_handler_install(
-    BSP_VECTOR_APIC_TIMER,
-    "ckinit",
-    RTEMS_INTERRUPT_UNIQUE,
-    xxx_apic_isr,
-    NULL
-  );
-  assert(sc == RTEMS_SUCCESSFUL);
-
+  /* Configure APIC timer in one-shot mode to prepare for calibration */
   amd64_apic_base[APIC_REGISTER_LVT_TIMER] = BSP_VECTOR_APIC_TIMER;
   amd64_apic_base[APIC_REGISTER_TIMER_DIV] = APIC_TIMER_SELECT_DIVIDER;
 
@@ -163,46 +150,55 @@ uint64_t apic_timer_initialize(uint64_t irq_ticks_per_sec)
       PIT_SELECT_ONE_SHOT_MODE | PIT_SELECT_BINARY_MODE
   );
 
+  /*
+   * Disable interrupts while we calibrate for 2 reasons:
+   *   - Writing values to the PIT should be atomic (for now, this is okay
+   *     because we're the only ones ever touching the PIT ports)
+   *   - We need to make sure that no interrupts throw our synchronization of
+   *     the APIC timer off.
+   */
   amd64_disable_interrupts();
+
+  /* Since the PIT only has 2 one-byte registers, the maximum tick value is
+   * limited. We can set the PIT to use a frequency divider if needed. */
+  assert(PIT_CALIBRATE_TICKS <= 0xffff);
+
   /* Set PIT reload value */
   uint32_t pit_ticks = PIT_CALIBRATE_TICKS;
-  uint8_t low_tick = ((uint16_t) pit_ticks) & 0xff;
-  uint8_t high_tick = ((uint16_t) pit_ticks) >> 8;
+  uint8_t low_tick = pit_ticks & 0xff;
+  uint8_t high_tick = (pit_ticks >> 8) & 0xff;
+
   outport_byte(PIT_PORT_CHAN2, low_tick);
-  // XXX: io_wait()?
+  stub_io_wait();
   outport_byte(PIT_PORT_CHAN2, high_tick);
-  amd64_enable_interrupts();
 
   /* Restart PIT by disabling the gated input and then re-enabling it */
   chan2_value &= ~PIT_CHAN2_TIMER_BIT;
-  outport_byte(PIT_PORT_CHAN2, chan2_value);
+  outport_byte(PIT_PORT_CHAN2_GATE, chan2_value);
   chan2_value |= PIT_CHAN2_TIMER_BIT;
-  outport_byte(PIT_PORT_CHAN2, chan2_value);
+  outport_byte(PIT_PORT_CHAN2_GATE, chan2_value);
 
   /* Start APIC timer's countdown */
   const uint32_t apic_calibrate_init_count = 0xffffffff;
   amd64_apic_base[APIC_REGISTER_TIMER_INITCNT] = apic_calibrate_init_count;
 
-  uint32_t old_pit_ticks = PIT_CALIBRATE_TICKS;
-  amd64_disable_interrupts();
-  while(pit_ticks > 0 && pit_ticks < PIT_CALIBRATE_TICKS)
+  while(pit_ticks <= PIT_CALIBRATE_TICKS)
   {
-    old_pit_ticks = pit_ticks;
     /* Send latch command to read multi-byte value atomically */
     outport_byte(PIT_PORT_MCR, PIT_SELECT_CHAN2);
     pit_ticks = inport_byte(PIT_PORT_CHAN2);
     pit_ticks |= inport_byte(PIT_PORT_CHAN2) << 8;
-
-    /* Make sure they're strictly decreasing */
-    assert(pit_ticks <= old_pit_ticks);
   }
-  amd64_enable_interrupts();
-
+  uint32_t apic_currcnt = amd64_apic_base[APIC_REGISTER_TIMER_CURRCNT];
   /* Stop APIC timer to calculate ticks to time ratio */
   amd64_apic_base[APIC_REGISTER_LVT_TIMER] = APIC_DISABLE;
 
+  /* Re-enable interrupts now that calibration is complete */
+  amd64_enable_interrupts();
+
   /* Get counts passed since we started counting */
-  uint64_t amd64_apic_ticks_per_sec = apic_calibrate_init_count - amd64_apic_base[APIC_REGISTER_TIMER_CURRCNT];
+  uint32_t amd64_apic_ticks_per_sec = apic_calibrate_init_count - apic_currcnt;
+  printf("APIC ticks passed in 1/%d of a second: %x\n", PIT_CALIBRATE_DIVIDER, amd64_apic_ticks_per_sec);
   /* We ran the PIT for a fraction of a second */
   amd64_apic_ticks_per_sec = amd64_apic_ticks_per_sec * PIT_CALIBRATE_DIVIDER;
 
@@ -250,6 +246,10 @@ void amd64_clock_initialize(void)
   rtems_timecounter_install(&amd64_clock_tc);
 }
 
-#define Clock_driver_support_initialize_hardware() amd64_clock_initialize()
+#define Clock_driver_support_install_isr(_new) \
+  apic_timer_install_handler()
+
+#define Clock_driver_support_initialize_hardware() \
+  amd64_clock_initialize()
 
 #include "../../../shared/dev/clock/clockimpl.h"
