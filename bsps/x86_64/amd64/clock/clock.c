@@ -27,6 +27,9 @@
 #include <assert.h>
 #include <bsp.h>
 #include <rtems.h>
+#include <pic.h>
+#include <apic.h>
+#include <clock.h>
 #include <rtems/score/interrupts.h>
 #include <rtems/timecounter.h>
 #include <rtems/score/cpu.h>

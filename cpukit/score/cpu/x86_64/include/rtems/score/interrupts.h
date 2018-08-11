@@ -70,7 +70,6 @@ extern "C" {
 
   RTEMS_STATIC_ASSERT(sizeof(struct idt_record) == 10, "IDT pointer must be exactly 10 bytes");
 
-  void print_idtr(void);
   void lidt(struct idt_record *idtr);
   interrupt_descriptor amd64_create_interrupt_descriptor(uintptr_t handler, uint8_t types_and_attributes);
   uintptr_t amd64_get_handler_from_idt(uint32_t vector);
