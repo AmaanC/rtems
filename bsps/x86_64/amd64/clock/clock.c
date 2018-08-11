@@ -35,7 +35,7 @@
 #include <bsp/irq-generic.h>
 
 /* Use the amd64_apic_base as a pointer into an array of 32-bit APIC registers */
-uint32_t *amd64_apic_base;
+volatile uint32_t *amd64_apic_base;
 static struct timecounter amd64_clock_tc;
 
 extern volatile uint32_t Clock_driver_ticks;
@@ -89,12 +89,10 @@ void apic_initialize(void)
     apic_base_msr >> 32
   );
 
-#if 1
-  printf("APIC is at %x\n", (uintptr_t) amd64_apic_base);
-  printf("APIC ID at *%x=%x\n", &amd64_apic_base[APIC_REGISTER_APICID], amd64_apic_base[APIC_REGISTER_APICID]);
+  DBG_PRINTF("APIC is at %x\n", (uintptr_t) amd64_apic_base);
+  DBG_PRINTF("APIC ID at *%x=%x\n", &amd64_apic_base[APIC_REGISTER_APICID], amd64_apic_base[APIC_REGISTER_APICID]);
 
-  printf("APIC spurious vector register *%x=%x\n", &amd64_apic_base[APIC_REGISTER_SPURIOUS], amd64_apic_base[APIC_REGISTER_SPURIOUS]);
-#endif
+  DBG_PRINTF("APIC spurious vector register *%x=%x\n", &amd64_apic_base[APIC_REGISTER_SPURIOUS], amd64_apic_base[APIC_REGISTER_SPURIOUS]);
 
   /*
    * Software enable the APIC by mapping spurious vector and setting enable bit.
@@ -103,9 +101,7 @@ void apic_initialize(void)
   amd64_install_raw_interrupt(BSP_VECTOR_SPURIOUS, apic_spurious_handler, &old);
   amd64_apic_base[APIC_REGISTER_SPURIOUS] = APIC_SPURIOUS_ENABLE | BSP_VECTOR_SPURIOUS;
 
-#if 1
-  printf("APIC spurious vector register *%x=%x\n", &amd64_apic_base[APIC_REGISTER_SPURIOUS], amd64_apic_base[APIC_REGISTER_SPURIOUS]);
-#endif
+  DBG_PRINTF("APIC spurious vector register *%x=%x\n", &amd64_apic_base[APIC_REGISTER_SPURIOUS], amd64_apic_base[APIC_REGISTER_SPURIOUS]);
 
   /*
    * The PIC may send spurious IRQs even when disabled, and without remapping
@@ -133,7 +129,7 @@ void apic_timer_install_handler(void)
   assert(sc == RTEMS_SUCCESSFUL);
 }
 
-uint64_t apic_timer_initialize(uint64_t irq_ticks_per_sec)
+void apic_timer_initialize(uint64_t desired_freq_hz)
 {
   /* Configure APIC timer in one-shot mode to prepare for calibration */
   amd64_apic_base[APIC_REGISTER_LVT_TIMER] = BSP_VECTOR_APIC_TIMER;
@@ -153,7 +149,8 @@ uint64_t apic_timer_initialize(uint64_t irq_ticks_per_sec)
   /*
    * Disable interrupts while we calibrate for 2 reasons:
    *   - Writing values to the PIT should be atomic (for now, this is okay
-   *     because we're the only ones ever touching the PIT ports)
+   *     because we're the only ones ever touching the PIT ports, but an
+   *     interrupt resetting the PIT could mess calibration up).
    *   - We need to make sure that no interrupts throw our synchronization of
    *     the APIC timer off.
    */
@@ -198,46 +195,46 @@ uint64_t apic_timer_initialize(uint64_t irq_ticks_per_sec)
 
   /* Get counts passed since we started counting */
   uint32_t amd64_apic_ticks_per_sec = apic_calibrate_init_count - apic_currcnt;
-  printf("APIC ticks passed in 1/%d of a second: %x\n", PIT_CALIBRATE_DIVIDER, amd64_apic_ticks_per_sec);
+  DBG_PRINTF("APIC ticks passed in 1/%d of a second: %x\n", PIT_CALIBRATE_DIVIDER, amd64_apic_ticks_per_sec);
   /* We ran the PIT for a fraction of a second */
   amd64_apic_ticks_per_sec = amd64_apic_ticks_per_sec * PIT_CALIBRATE_DIVIDER;
 
   assert(amd64_apic_ticks_per_sec != 0 && amd64_apic_ticks_per_sec != apic_calibrate_init_count);
 
-  /* Multiply to undo effects of divider */
-  uint64_t cpu_bus_frequency = amd64_apic_ticks_per_sec * APIC_TIMER_DIVIDE_VALUE;
-
-  printf("CPU frequency: 0x%llx\nAPIC ticks/sec: 0x%llx", cpu_bus_frequency, amd64_apic_ticks_per_sec);
+  DBG_PRINTF(
+    "CPU frequency: 0x%llx\nAPIC ticks/sec: 0x%llx",
+    /* Multiply to undo effects of divider */
+    (uint64_t) amd64_apic_ticks_per_sec * APIC_TIMER_DIVIDE_VALUE,
+    amd64_apic_ticks_per_sec
+  );
 
   /*
    * The APIC timer counter is decremented at the speed of the CPU bus
-   * frequency.
+   * frequency (and we use a frequency divider).
    *
    * This means:
-   *   cpu_time_per_tick = 1 / (cpu_bus_frequency / timer_divide_value)
+   *   apic_ticks_per_sec = (cpu_bus_frequency / timer_divide_value)
    *
    * Therefore:
-   *   reload_value * cpu_timer_per_tick = (1/apic_timer_frequency)
+   *   reload_value = apic_ticks_per_sec / desired_freq_hz
    */
-  uint32_t apic_timer_reload_value = (cpu_bus_frequency / APIC_TIMER_DIVIDE_VALUE) / irq_ticks_per_sec;
+  uint32_t apic_timer_reload_value = amd64_apic_ticks_per_sec / desired_freq_hz;
 
   amd64_apic_base[APIC_REGISTER_LVT_TIMER] = BSP_VECTOR_APIC_TIMER | APIC_SELECT_TMR_PERIODIC;
   amd64_apic_base[APIC_REGISTER_TIMER_DIV] = APIC_TIMER_SELECT_DIVIDER;
   amd64_apic_base[APIC_REGISTER_TIMER_INITCNT] = apic_timer_reload_value;
-
-  return amd64_apic_ticks_per_sec;
 }
 
 void amd64_clock_initialize(void)
 {
   uint64_t us_per_tick = rtems_configuration_get_microseconds_per_tick();
   uint64_t irq_ticks_per_sec = 1000000 / us_per_tick;
-  printf("us_per_tick = %d\nDesired frequency = %d irqs/sec\n", us_per_tick, irq_ticks_per_sec);
+  DBG_PRINTF("us_per_tick = %d\nDesired frequency = %d irqs/sec\n", us_per_tick, irq_ticks_per_sec);
 
   /* Setup and enable the APIC itself */
   apic_initialize();
   /* Setup and initialize the APIC timer */
-  uint64_t apic_freq = apic_timer_initialize(irq_ticks_per_sec);
+  apic_timer_initialize(irq_ticks_per_sec);
 
   amd64_clock_tc.tc_get_timecount = amd64_clock_get_timecount;
   amd64_clock_tc.tc_counter_mask = 0xffffffff;

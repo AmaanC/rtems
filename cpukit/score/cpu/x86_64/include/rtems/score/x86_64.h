@@ -80,7 +80,7 @@ extern "C" {
 #define APIC_BASE_MSR_ENABLE      0x800
 
 #ifndef ASM
-  extern uint32_t *amd64_apic_base;
+  extern volatile uint32_t *amd64_apic_base;
 #endif
 
 /*

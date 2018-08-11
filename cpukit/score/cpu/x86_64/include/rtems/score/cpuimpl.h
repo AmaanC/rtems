@@ -115,6 +115,14 @@ static inline void stub_io_wait(void)
    * exists so it's easier to find all the places it may be used.
    */
 }
+
+#if DEBUG
+#define DBG_PRINTF(format, args...)             \
+  printf(format, ## args)
+#else
+#define DBG_PRINTF(format, args...)
+#endif
+
 #ifdef __cplusplus
 }
 #endif
