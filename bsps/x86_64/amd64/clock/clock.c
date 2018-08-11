@@ -24,6 +24,7 @@
  * SUCH DAMAGE.
  */
 
+#include <stdio.h>
 #include <assert.h>
 #include <bsp.h>
 #include <rtems.h>
@@ -69,7 +70,7 @@ bool has_apic_support()
  */
 void apic_initialize(void)
 {
-  if (!has_apic_support()) {
+  if ( !has_apic_support() ) {
     printf("cpuid claims no APIC support; trying anyway.\n");
   }
 
@@ -83,7 +84,7 @@ void apic_initialize(void)
    */
   uint64_t apic_base_msr = rdmsr(APIC_BASE_MSR);
   amd64_apic_base = (uint32_t*) apic_base_msr;
-  amd64_apic_base = (uintptr_t) amd64_apic_base & 0x0ffffff000;
+  amd64_apic_base = (uint32_t*) ((uintptr_t) amd64_apic_base & 0x0ffffff000);
 
   /* Hardware enable the APIC just to be sure */
   wrmsr(
@@ -101,7 +102,11 @@ void apic_initialize(void)
    * Software enable the APIC by mapping spurious vector and setting enable bit.
    */
   uintptr_t old;
-  amd64_install_raw_interrupt(BSP_VECTOR_SPURIOUS, apic_spurious_handler, &old);
+  amd64_install_raw_interrupt(
+    BSP_VECTOR_SPURIOUS,
+    (uintptr_t) apic_spurious_handler,
+    &old
+  );
   amd64_apic_base[APIC_REGISTER_SPURIOUS] = APIC_SPURIOUS_ENABLE | BSP_VECTOR_SPURIOUS;
 
   DBG_PRINTF("APIC spurious vector register *%x=%x\n", &amd64_apic_base[APIC_REGISTER_SPURIOUS], amd64_apic_base[APIC_REGISTER_SPURIOUS]);
@@ -114,7 +119,7 @@ void apic_initialize(void)
   pic_disable();
 }
 
-void apic_isr(void *param)
+static void apic_isr(void *param)
 {
   Clock_isr(param);
   amd64_apic_base[APIC_REGISTER_EOI] = APIC_EOI_ACK;

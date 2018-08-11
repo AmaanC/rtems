@@ -27,6 +27,7 @@
 #include <bsp.h>
 #include <bsp/bootcard.h>
 #include <libcpu/page.h>
+#include <bsp/irq-generic.h>
 
 void bsp_start(void)
 {

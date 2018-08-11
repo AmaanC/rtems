@@ -41,6 +41,9 @@
 #include <libcpu/page.h>
 #include <rtems/score/cpuimpl.h>
 
+uint64_t amd64_pml4[NUM_PAGE_TABLE_ENTRIES] RTEMS_ALIGNED(4096);
+uint64_t amd64_pdpt[NUM_PAGE_TABLE_ENTRIES] RTEMS_ALIGNED(4096);
+
 bool paging_1gib_pages_supported(void)
 {
   /*
@@ -86,7 +89,9 @@ static inline void assert_0s_from_bit(uint64_t entry, uint8_t bit_pos)
   assert((entry & get_mask_for_bits(bit_pos, 64)) == 0);
 }
 
-uint64_t create_cr3_entry(uint64_t phys_addr, uint8_t maxphysaddr, uint64_t flags)
+uint64_t create_cr3_entry(
+  uint64_t phys_addr, uint8_t maxphysaddr, uint64_t flags
+)
 {
   /* Confirm PML4 address is aligned on a 4KiB boundary */
   assert((phys_addr & 0xfff) == 0);
@@ -97,7 +102,9 @@ uint64_t create_cr3_entry(uint64_t phys_addr, uint8_t maxphysaddr, uint64_t flag
   return entry;
 }
 
-uint64_t create_pml4_entry(uint64_t phys_addr, uint8_t maxphysaddr, uint64_t flags)
+uint64_t create_pml4_entry(
+  uint64_t phys_addr, uint8_t maxphysaddr, uint64_t flags
+)
 {
   /* Confirm address we're writing is aligned on a 4KiB boundary */
   assert((phys_addr & 0xfff) == 0);
@@ -112,7 +119,9 @@ uint64_t create_pml4_entry(uint64_t phys_addr, uint8_t maxphysaddr, uint64_t fla
   return entry;
 }
 
-uint64_t create_pdpt_entry(uint64_t phys_addr, uint8_t maxphysaddr, uint64_t flags)
+uint64_t create_pdpt_entry(
+  uint64_t phys_addr, uint8_t maxphysaddr, uint64_t flags
+)
 {
   /* Confirm physical address is a 1GiB aligned page address */
   assert((phys_addr & 0x3fffffff) == 0);
@@ -126,9 +135,6 @@ uint64_t create_pdpt_entry(uint64_t phys_addr, uint8_t maxphysaddr, uint64_t fla
   assert_0s_from_bit(entry, maxphysaddr);
   return entry;
 }
-
-uint64_t amd64_pml4[NUM_PAGE_TABLE_ENTRIES] RTEMS_ALIGNED(4096);
-uint64_t amd64_pdpt[NUM_PAGE_TABLE_ENTRIES] RTEMS_ALIGNED(4096);
 
 void paging_init(void)
 {

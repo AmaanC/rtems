@@ -27,12 +27,19 @@
 #ifndef _AMD64_CLOCK_H
 #define _AMD64_CLOCK_H
 
+#include <rtems/score/basedefs.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #ifndef ASM
   extern volatile uint32_t *amd64_apic_base;
+  bool has_apic_support();
+  void apic_initialize(void);
+  void apic_timer_install_handler(void);
+  void apic_timer_initialize(uint64_t desired_freq_hz);
+  void amd64_clock_initialize(void);
 #endif
 
 /* Default divide value used by APIC timer */

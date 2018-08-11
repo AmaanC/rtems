@@ -34,6 +34,21 @@
 extern uint64_t amd64_pml4[NUM_PAGE_TABLE_ENTRIES];
 extern uint64_t amd64_pdpt[NUM_PAGE_TABLE_ENTRIES];
 
+bool paging_1gib_pages_supported(void);
+uint8_t get_maxphysaddr(void);
+uint64_t get_mask_for_bits(uint8_t start, uint8_t end);
+uint64_t create_cr3_entry(
+  uint64_t phys_addr, uint8_t maxphysaddr, uint64_t flags
+);
+uint64_t create_pml4_entry(
+  uint64_t phys_addr, uint8_t maxphysaddr, uint64_t flags
+);
+uint64_t create_pdpt_entry(
+  uint64_t phys_addr, uint8_t maxphysaddr, uint64_t flags
+);
+
+void paging_init(void);
+
 #define PAGE_FLAGS_PRESENT          (1 << 0)
 #define PAGE_FLAGS_WRITABLE         (1 << 1)
 #define PAGE_FLAGS_USER_ACCESSIBLE  (1 << 2)
