@@ -40,6 +40,7 @@ extern "C" {
 #endif
 
 #include <rtems/score/basedefs.h>
+#include <rtems/score/cpu_asm.h>
 #include <rtems/score/x86_64.h>
 
 #define CPU_SIMPLE_VECTORED_INTERRUPTS FALSE
@@ -131,7 +132,7 @@ typedef struct {
 
   /* XXX:
    * - FS segment selector for TLS
-   * - x87 SW?
+   * - x87 status word?
    * - MMX?
    * - XMM?
    */
@@ -141,6 +142,10 @@ typedef struct {
 
 #define CPU_INTERRUPT_FRAME_SIZE 80
 
+/*
+ * When SMP is enabled, percpuasm.c has a similar assert, but since we use the
+ * interrupt frame regardless of SMP, we'll confirm it here.
+ */
 #ifndef ASM
   RTEMS_STATIC_ASSERT(
     sizeof(CPU_Interrupt_frame) == CPU_INTERRUPT_FRAME_SIZE,
