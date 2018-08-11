@@ -38,7 +38,7 @@
 #endif
 
 #include <rtems/system.h>
-#include <rtems/score/interrupts.h>
+#include <rtems/score/idt.h>
 #include <rtems/score/isr.h>
 #include <rtems/score/wkspace.h>
 #include <rtems/score/tls.h>

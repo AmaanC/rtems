@@ -30,7 +30,7 @@
 #include <pic.h>
 #include <apic.h>
 #include <clock.h>
-#include <rtems/score/interrupts.h>
+#include <rtems/score/idt.h>
 #include <rtems/timecounter.h>
 #include <rtems/score/cpu.h>
 #include <rtems/score/cpuimpl.h>

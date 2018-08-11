@@ -26,7 +26,6 @@
 
 #include <stdint.h>
 #include <rtems.h>
-#include <rtems/score/interrupts.h>
 #include <rtems/score/basedefs.h>
 #include <rtems/score/x86_64.h>
 #include <rtems/score/cpuimpl.h>
