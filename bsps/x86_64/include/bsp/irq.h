@@ -1,4 +1,9 @@
 /*
+ * This file contains the mandatory defines to support the irq.h and
+ * irq-generic.c interfaces (initialized finally with bsp_interrupt_initialize).
+ */
+
+/*
  * Copyright (c) 2018.
  * Amaan Cheval <amaan.cheval@gmail.com>
  *

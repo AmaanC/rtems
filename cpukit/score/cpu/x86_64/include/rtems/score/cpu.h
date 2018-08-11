@@ -123,8 +123,9 @@ typedef struct {
 
   uint64_t rbp;
   /*
-   * The rsp just before _ISR_Handler is called; needed because we're not sure
-   * how alignment may move the stack-pointer around.
+   * The rsp just before _ISR_Handler is called; needed because in the handler,
+   * we align the stack to make further calls, and we're not sure how alignment
+   * may move the stack-pointer around, leaving no way to "get back".
    */
   uint64_t saved_rsp;
 
