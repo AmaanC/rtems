@@ -127,7 +127,7 @@ void amd64_dispatch_isr(rtems_vector_number vector)
 rtems_status_code bsp_interrupt_facility_initialize(void)
 {
   uintptr_t old;
-  for (uint32_t i = 0; i <= BSP_IRQ_VECTOR_NUMBER; i++) {
+  for (uint32_t i = 0; i < BSP_IRQ_VECTOR_NUMBER; i++) {
     amd64_install_raw_interrupt(i, rtemsIRQs[i], &old);
   }
 
