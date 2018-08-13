@@ -44,11 +44,12 @@ SYM(apic_spurious_handler):
   iretq
 
 /*
- * rbx is a callee-saved register, which means we can use it in our interrupt,
- * as a persistent scratch register (i.e. calls will not destroy it), as long as
- * we also save and restore it for the interrupted task.
+ * These are callee-saved registers, which means we can use them in our interrupts
+ * as persistent scratch registers (i.e. calls will not destroy them), as long
+ * as we also save and restore it for the interrupted task.
  */
-.set SCRATCH_REG, rbx
+.set SCRATCH_REG0, rbp
+.set SCRATCH_REG1, rbx
 
 /*
  * We need to set a distinct handler for every interrupt vector so that
@@ -59,9 +60,10 @@ SYM(apic_spurious_handler):
   PUBLIC(rtems_irq_prologue_ ## vector)  ; \
 SYM(rtems_irq_prologue_ ## vector):      ; \
   pushq REG_ARG0                         ; \
-  movq   $vector, REG_ARG0               ; \
-  pushq SCRATCH_REG                      ; \
-  jmp   SYM(_ISR_Handler)                ; \
+  movq  $vector, REG_ARG0                ; \
+  pushq SCRATCH_REG0                     ; \
+  pushq SCRATCH_REG1                     ; \
+  jmp   SYM(_ISR_Handler)
 
 DISTINCT_INTERRUPT_ENTRY(0)
 DISTINCT_INTERRUPT_ENTRY(1)
@@ -97,33 +99,48 @@ DISTINCT_INTERRUPT_ENTRY(30)
 DISTINCT_INTERRUPT_ENTRY(31)
 DISTINCT_INTERRUPT_ENTRY(32)
 
+#if DEBUG
+#define CHECK_RSP() \
+  push rdi                      ; \
+  movq rsp, rdi                 ; \
+  call SYM(xxx_print_rsp)       ; \
+  popq rdi
+#else
+#define CHECK_RSP()
+#endif
+
 SYM(_ISR_Handler):
+  CHECK_RSP()
+
 .save_cpu_interrupt_frame:
-  movq rsp, SCRATCH_REG
+.set SAVED_RSP, SCRATCH_REG0
+  movq rsp, SAVED_RSP
 
   /* Make space for CPU_Interrupt_frame */
   subq $CPU_INTERRUPT_FRAME_SIZE, rsp
 .set ALIGNMENT_MASK, ~(CPU_STACK_ALIGNMENT - 1)
   andq $ALIGNMENT_MASK, rsp
+  CHECK_RSP()
   // XXX: Save interrupt mask?
 
   /* Save caller-saved registers to CPU_Interrupt_frame */
-  movq rax,         (9 * CPU_SIZEOF_POINTER)(rsp)
-  movq rcx,         (8 * CPU_SIZEOF_POINTER)(rsp)
-  movq rdx,         (7 * CPU_SIZEOF_POINTER)(rsp)
-  movq rsi,         (6 * CPU_SIZEOF_POINTER)(rsp)
-  movq r8,          (5 * CPU_SIZEOF_POINTER)(rsp)
-  movq r9,          (4 * CPU_SIZEOF_POINTER)(rsp)
-  movq r10,         (3 * CPU_SIZEOF_POINTER)(rsp)
-  movq r11,         (2 * CPU_SIZEOF_POINTER)(rsp)
-  movq rbp,         (1 * CPU_SIZEOF_POINTER)(rsp)
+  movq rax,         (8 * CPU_SIZEOF_POINTER)(rsp)
+  movq rcx,         (7 * CPU_SIZEOF_POINTER)(rsp)
+  movq rdx,         (6 * CPU_SIZEOF_POINTER)(rsp)
+  movq rsi,         (5 * CPU_SIZEOF_POINTER)(rsp)
+  movq r8,          (4 * CPU_SIZEOF_POINTER)(rsp)
+  movq r9,          (3 * CPU_SIZEOF_POINTER)(rsp)
+  movq r10,         (2 * CPU_SIZEOF_POINTER)(rsp)
+  movq r11,         (1 * CPU_SIZEOF_POINTER)(rsp)
 
   /* Save the initial rsp */
-  movq SCRATCH_REG, (0 * CPU_SIZEOF_POINTER)(rsp)
+  movq SAVED_RSP,   (0 * CPU_SIZEOF_POINTER)(rsp)
 
 .switch_stack_if_needed:
-  /* Save current rsp so we can find CPU_Interrupt_frame again later */
-  movq rsp, rbp
+  /* Save current aligned rsp so we can find CPU_Interrupt_frame again later */
+  CHECK_RSP()
+  movq rsp, SAVED_RSP
+  CHECK_RSP()
 
   /*
    * Switch to interrupt stack if necessary; it's necessary if this is the
@@ -133,7 +150,7 @@ SYM(_ISR_Handler):
 #ifdef RTEMS_SMP
   /* XXX: We should call _CPU_SMP_Get_current_processor here */
 #endif
-.set Per_CPU_Info, SCRATCH_REG
+.set Per_CPU_Info, SCRATCH_REG1
   movq $SYM(_Per_CPU_Information), Per_CPU_Info
   cmpq $0, PER_CPU_ISR_NEST_LEVEL(Per_CPU_Info)
   jne  .skip_switch
@@ -145,11 +162,24 @@ SYM(_ISR_Handler):
 
 .call_isr_dispatch:
   /* REG_ARG0 already includes the vector number, so we can simply call */
+  CHECK_RSP()
   call amd64_dispatch_isr
+  CHECK_RSP()
 
 .restore_stack:
   /* Restore stack; if this is the outermost stack, we're going back to the task stack */
-  movq rbp, rsp
+  movq SAVED_RSP, rsp
+  CHECK_RSP()
+
+#if DEBUG
+.check_rsp_0:
+  cmpq $0, rsp
+  jne  .assert_pass
+.assert_fail:
+  jmp  .assert_fail
+.assert_pass:
+#endif
+
   decq PER_CPU_ISR_NEST_LEVEL(Per_CPU_Info)
   decq PER_CPU_THREAD_DISPATCH_DISABLE_LEVEL(Per_CPU_Info)
   /* XXX: Possible bug in QEMU causing ZF to not be set by decq? */
@@ -164,23 +194,24 @@ SYM(_ISR_Handler):
 
 .restore_cpu_interrupt_frame:
   /* Restore registers from CPU_Interrupt_frame */
-  movq (9 * CPU_SIZEOF_POINTER)(rsp), rax
-  movq (8 * CPU_SIZEOF_POINTER)(rsp), rcx
-  movq (7 * CPU_SIZEOF_POINTER)(rsp), rdx
-  movq (6 * CPU_SIZEOF_POINTER)(rsp), rsi
-  movq (5 * CPU_SIZEOF_POINTER)(rsp), r8
-  movq (4 * CPU_SIZEOF_POINTER)(rsp), r9
-  movq (3 * CPU_SIZEOF_POINTER)(rsp), r10
-  movq (2 * CPU_SIZEOF_POINTER)(rsp), r11
-  movq (1 * CPU_SIZEOF_POINTER)(rsp), rbp
+  movq (8 * CPU_SIZEOF_POINTER)(rsp), rax
+  movq (7 * CPU_SIZEOF_POINTER)(rsp), rcx
+  movq (6 * CPU_SIZEOF_POINTER)(rsp), rdx
+  movq (5 * CPU_SIZEOF_POINTER)(rsp), rsi
+  movq (4 * CPU_SIZEOF_POINTER)(rsp), r8
+  movq (3 * CPU_SIZEOF_POINTER)(rsp), r9
+  movq (2 * CPU_SIZEOF_POINTER)(rsp), r10
+  movq (1 * CPU_SIZEOF_POINTER)(rsp), r11
 
   /* Restore the rsp value from just before _ISR_Handler was called */
-  movq (0 * CPU_SIZEOF_POINTER)(rsp), SCRATCH_REG
+  movq (0 * CPU_SIZEOF_POINTER)(rsp), SAVED_RSP
 
-  movq SCRATCH_REG, rsp
+  movq SAVED_RSP, rsp
 
+  CHECK_RSP()
   /* Restore args DISTINCT_INTERRUPT_ENTRY pushed to task stack */
-  popq SCRATCH_REG
+  popq SCRATCH_REG1
+  popq SCRATCH_REG0
   popq REG_ARG0
   iretq
 

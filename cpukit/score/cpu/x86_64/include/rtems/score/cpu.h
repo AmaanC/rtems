@@ -122,11 +122,11 @@ typedef struct {
   uint64_t r10;
   uint64_t r11;
 
-  uint64_t rbp;
   /*
-   * The rsp just before _ISR_Handler is called; needed because in the handler,
-   * we align the stack to make further calls, and we're not sure how alignment
-   * may move the stack-pointer around, leaving no way to "get back".
+   * This holds the rsp just before _ISR_Handler is called; it's needed because
+   * in the handler, we align the stack to make further calls, and we're not
+   * sure how alignment may move the stack-pointer around, leaving no way to get
+   * back to the stack, and therefore the interrupt frame.
    */
   uint64_t saved_rsp;
 
@@ -140,7 +140,7 @@ typedef struct {
 
 #endif /* !ASM */
 
-#define CPU_INTERRUPT_FRAME_SIZE 80
+#define CPU_INTERRUPT_FRAME_SIZE 72
 
 /*
  * When SMP is enabled, percpuasm.c has a similar assert, but since we use the
