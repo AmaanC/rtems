@@ -37,6 +37,8 @@ extern "C" {
 #define COM1_BASE_IO    0x3F8
 #define COM1_CLOCK_RATE (115200 * 16)
 
+#define EFLAGS_INTR_ENABLE 0x200
+
 #if DEBUG
 #define DBG_PRINTF(format, args...)             \
   printf(format, ## args)

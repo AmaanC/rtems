@@ -171,31 +171,55 @@ typedef struct {
 
 #define _CPU_Initialize_vectors()
 
-// XXX: For RTEMS critical sections
-#define _CPU_ISR_Disable( _isr_cookie ) \
-  { \
-    (_isr_cookie) = 0;   /* do something to prevent warnings */ \
-  }
-
-#define _CPU_ISR_Enable( _isr_cookie )  \
-  { \
-    (void) (_isr_cookie);   /* prevent warnings from -Wunused-but-set-variable */ \
-  }
-
-#define _CPU_ISR_Flash( _isr_cookie ) \
-  { \
-  }
-
-RTEMS_INLINE_ROUTINE bool _CPU_ISR_Is_enabled( uint32_t level )
-{
-  return false;
+#define _CPU_ISR_Enable(_level)                             \
+{                                                           \
+  amd64_enable_interrupts();                                \
+  _level = 0;                                               \
+  (void) _level; /* Prevent -Wunused-but-set-variable */    \
 }
 
-#define _CPU_ISR_Set_level( new_level ) \
-  { \
-  }
+#define _CPU_ISR_Disable(_level)                            \
+{                                                           \
+  amd64_enable_interrupts();                                \
+  _level = 1;                                               \
+  (void) _level; /* Prevent -Wunused-but-set-variable */    \
+}
 
-uint32_t   _CPU_ISR_Get_level( void );
+#define _CPU_ISR_Flash(_level)                              \
+{                                                           \
+  amd64_enable_interrupts();                                \
+  amd64_disable_interrupts();                               \
+  _level = 1;                                               \
+  (void) _level; /* Prevent -Wunused-but-set-variable */    \
+}
+
+RTEMS_INLINE_ROUTINE bool _CPU_ISR_Is_enabled(uint32_t level)
+{
+  return (level & EFLAGS_INTR_ENABLE) != 0;
+}
+
+RTEMS_INLINE_ROUTINE void _CPU_ISR_Set_level(uint32_t new_level)
+{
+  if (new_level) {
+    amd64_disable_interrupts();
+  }
+  else {
+    amd64_enable_interrupts();
+  }
+}
+
+RTEMS_INLINE_ROUTINE uint32_t _CPU_ISR_Get_level(void)
+{
+  uint64_t rflags;
+
+  __asm__ volatile ( "pushf; \
+                      popq %0"
+                     : "=rm" (rflags)
+  );
+
+  uint32_t level = (rflags & EFLAGS_INTR_ENABLE) ? 0 : 1;
+  return level;
+}
 
 /* end of ISR handler macros */
 
