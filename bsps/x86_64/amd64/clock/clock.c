@@ -137,7 +137,7 @@ void apic_timer_install_handler(void)
   assert(sc == RTEMS_SUCCESSFUL);
 }
 
-void apic_timer_initialize(uint64_t desired_freq_hz)
+uint32_t apic_timer_calibrate(void)
 {
   /* Configure APIC timer in one-shot mode to prepare for calibration */
   amd64_apic_base[APIC_REGISTER_LVT_TIMER] = BSP_VECTOR_APIC_TIMER;
@@ -164,10 +164,6 @@ void apic_timer_initialize(uint64_t desired_freq_hz)
    */
   amd64_disable_interrupts();
 
-  /* Since the PIT only has 2 one-byte registers, the maximum tick value is
-   * limited. We can set the PIT to use a frequency divider if needed. */
-  assert(PIT_CALIBRATE_TICKS <= 0xffff);
-
   /* Set PIT reload value */
   uint32_t pit_ticks = PIT_CALIBRATE_TICKS;
   uint8_t low_tick = pit_ticks & 0xff;
@@ -177,14 +173,14 @@ void apic_timer_initialize(uint64_t desired_freq_hz)
   stub_io_wait();
   outport_byte(PIT_PORT_CHAN2, high_tick);
 
+  /* Start APIC timer's countdown */
+  const uint32_t apic_calibrate_init_count = 0xffffffff;
+
   /* Restart PIT by disabling the gated input and then re-enabling it */
   chan2_value &= ~PIT_CHAN2_TIMER_BIT;
   outport_byte(PIT_PORT_CHAN2_GATE, chan2_value);
   chan2_value |= PIT_CHAN2_TIMER_BIT;
   outport_byte(PIT_PORT_CHAN2_GATE, chan2_value);
-
-  /* Start APIC timer's countdown */
-  const uint32_t apic_calibrate_init_count = 0xffffffff;
   amd64_apic_base[APIC_REGISTER_TIMER_INITCNT] = apic_calibrate_init_count;
 
   while(pit_ticks <= PIT_CALIBRATE_TICKS)
@@ -195,26 +191,47 @@ void apic_timer_initialize(uint64_t desired_freq_hz)
     pit_ticks |= inport_byte(PIT_PORT_CHAN2) << 8;
   }
   uint32_t apic_currcnt = amd64_apic_base[APIC_REGISTER_TIMER_CURRCNT];
+
+  DBG_PRINTF("PIT stopped at 0x%x\n", pit_ticks);
+
   /* Stop APIC timer to calculate ticks to time ratio */
   amd64_apic_base[APIC_REGISTER_LVT_TIMER] = APIC_DISABLE;
+
+  /* Get counts passed since we started counting */
+  uint32_t apic_ticks_per_sec = apic_calibrate_init_count - apic_currcnt;
+
+  DBG_PRINTF("APIC ticks passed in 1/%d of a second: 0x%x\n", PIT_CALIBRATE_DIVIDER, apic_ticks_per_sec);
+
+  /* We ran the PIT for a fraction of a second */
+  apic_ticks_per_sec = apic_ticks_per_sec * PIT_CALIBRATE_DIVIDER;
 
   /* Re-enable interrupts now that calibration is complete */
   amd64_enable_interrupts();
 
-  /* Get counts passed since we started counting */
-  uint32_t amd64_apic_ticks_per_sec = apic_calibrate_init_count - apic_currcnt;
-  DBG_PRINTF("APIC ticks passed in 1/%d of a second: %x\n", PIT_CALIBRATE_DIVIDER, amd64_apic_ticks_per_sec);
-  /* We ran the PIT for a fraction of a second */
-  amd64_apic_ticks_per_sec = amd64_apic_ticks_per_sec * PIT_CALIBRATE_DIVIDER;
-
-  assert(amd64_apic_ticks_per_sec != 0 && amd64_apic_ticks_per_sec != apic_calibrate_init_count);
+  /* Confirm that the APIC timer never hit 0 and IRQ'd during calibration */
+  assert(Clock_driver_ticks == 0);
+  assert(apic_ticks_per_sec != 0 && apic_ticks_per_sec != apic_calibrate_init_count);
 
   DBG_PRINTF(
-    "CPU frequency: 0x%llx\nAPIC ticks/sec: 0x%llx",
+    "CPU frequency: 0x%llx\nAPIC ticks/sec: 0x%llx\n",
     /* Multiply to undo effects of divider */
-    (uint64_t) amd64_apic_ticks_per_sec * APIC_TIMER_DIVIDE_VALUE,
-    amd64_apic_ticks_per_sec
+    (uint64_t) apic_ticks_per_sec * APIC_TIMER_DIVIDE_VALUE,
+    apic_ticks_per_sec
   );
+
+  return apic_ticks_per_sec;
+}
+
+void apic_timer_initialize(uint64_t desired_freq_hz)
+{
+  uint32_t apic_ticks_per_sec = 0;
+  uint32_t apic_tick_collections[APIC_TIMER_NUM_CALIBRATIONS] = {0};
+  uint64_t apic_tick_total = 0;
+  for (uint32_t i = 0; i < APIC_TIMER_NUM_CALIBRATIONS; i++) {
+    apic_tick_collections[i] = apic_timer_calibrate();
+    apic_tick_total += apic_tick_collections[i];
+  }
+  apic_ticks_per_sec = apic_tick_total / APIC_TIMER_NUM_CALIBRATIONS;
 
   /*
    * The APIC timer counter is decremented at the speed of the CPU bus
@@ -226,14 +243,14 @@ void apic_timer_initialize(uint64_t desired_freq_hz)
    * Therefore:
    *   reload_value = apic_ticks_per_sec / desired_freq_hz
    */
-  uint32_t apic_timer_reload_value = amd64_apic_ticks_per_sec / desired_freq_hz;
+  uint32_t apic_timer_reload_value = apic_ticks_per_sec / desired_freq_hz;
 
   amd64_apic_base[APIC_REGISTER_LVT_TIMER] = BSP_VECTOR_APIC_TIMER | APIC_SELECT_TMR_PERIODIC;
   amd64_apic_base[APIC_REGISTER_TIMER_DIV] = APIC_TIMER_SELECT_DIVIDER;
   amd64_apic_base[APIC_REGISTER_TIMER_INITCNT] = apic_timer_reload_value;
 }
 
-void amd64_clock_initialize(void)
+void amd64_clock_driver_initialize(void)
 {
   uint64_t us_per_tick = rtems_configuration_get_microseconds_per_tick();
   uint64_t irq_ticks_per_sec = 1000000 / us_per_tick;
@@ -255,6 +272,6 @@ void amd64_clock_initialize(void)
   apic_timer_install_handler()
 
 #define Clock_driver_support_initialize_hardware() \
-  amd64_clock_initialize()
+  amd64_clock_driver_initialize()
 
 #include "../../../shared/dev/clock/clockimpl.h"
