@@ -119,11 +119,6 @@ void amd64_install_raw_interrupt(uint32_t vector, uintptr_t new_handler, uintptr
   amd64_idt[vector] = new_desc;
 }
 
-void xxx_print_rsp(uint64_t rsp)
-{
-  printf("RSP=0x%llx\n",rsp-8);
-}
-
 void amd64_dispatch_isr(rtems_vector_number vector)
 {
   bsp_interrupt_handler_dispatch(vector);
