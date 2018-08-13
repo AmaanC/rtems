@@ -200,7 +200,7 @@ RTEMS_INLINE_ROUTINE bool _CPU_ISR_Is_enabled(uint32_t level)
 
 RTEMS_INLINE_ROUTINE void _CPU_ISR_Set_level(uint32_t new_level)
 {
-  if (new_level) {
+  if ( new_level ) {
     amd64_disable_interrupts();
   }
   else {

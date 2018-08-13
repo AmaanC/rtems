@@ -183,8 +183,7 @@ uint32_t apic_timer_calibrate(void)
   outport_byte(PIT_PORT_CHAN2_GATE, chan2_value);
   amd64_apic_base[APIC_REGISTER_TIMER_INITCNT] = apic_calibrate_init_count;
 
-  while(pit_ticks <= PIT_CALIBRATE_TICKS)
-  {
+  while ( pit_ticks <= PIT_CALIBRATE_TICKS ) {
     /* Send latch command to read multi-byte value atomically */
     outport_byte(PIT_PORT_MCR, PIT_SELECT_CHAN2);
     pit_ticks = inport_byte(PIT_PORT_CHAN2);

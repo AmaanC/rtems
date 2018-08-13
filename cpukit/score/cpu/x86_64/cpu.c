@@ -72,5 +72,5 @@ void _CPU_ISR_install_vector(
 
 void *_CPU_Thread_Idle_body(uintptr_t ignored)
 {
-  for( ; ; ) { }
+  for ( ; ; ) { }
 }
