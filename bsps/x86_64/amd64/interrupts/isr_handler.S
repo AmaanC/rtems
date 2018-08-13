@@ -102,8 +102,9 @@ SYM(_ISR_Handler):
   movq rsp, SCRATCH_REG
 
   /* Make space for CPU_Interrupt_frame */
-  subq CPU_INTERRUPT_FRAME_SIZE, rsp
-  andq CPU_STACK_ALIGNMENT - 1,  rsp
+  subq $CPU_INTERRUPT_FRAME_SIZE, rsp
+.set ALIGNMENT_MASK, ~(CPU_STACK_ALIGNMENT - 1)
+  andq $ALIGNMENT_MASK, rsp
   // XXX: Save interrupt mask?
 
   /* Save caller-saved registers to CPU_Interrupt_frame */
