@@ -51,7 +51,8 @@ extern "C" {
 typedef struct _interrupt_descriptor {
   uint16_t offset_0;              // bits 0-15
   uint16_t segment_selector;      // a segment selector in the GDT or LDT
-  uint8_t  interrupt_stack_table; // bits 0-2 are the offset into the IST, stored in the TSS
+  /* bits 0-2 are the offset into the IST, stored in the TSS */
+  uint8_t  interrupt_stack_table;
   uint8_t  type_and_attributes;
   uint16_t offset_1;              // bits 16-31
   uint32_t offset_2;              // bits 32-63
@@ -65,7 +66,10 @@ struct idt_record {
   uintptr_t base;       /* Pointer to IDT array  */
 } RTEMS_PACKED;
 
-RTEMS_STATIC_ASSERT(sizeof(struct idt_record) == 10, "IDT pointer must be exactly 10 bytes");
+RTEMS_STATIC_ASSERT(
+  sizeof(struct idt_record) == 10,
+  "IDT pointer must be exactly 10 bytes"
+);
 
 void lidt(struct idt_record *idtr);
 

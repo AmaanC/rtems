@@ -162,5 +162,11 @@ void paging_init(void)
     );
   }
 
-  amd64_set_cr3(create_cr3_entry((uint64_t) &amd64_pml4, maxphysaddr, PAGE_FLAGS_WRITE_THROUGH));
+  amd64_set_cr3(
+    create_cr3_entry(
+      (uint64_t) &amd64_pml4,
+      maxphysaddr,
+      PAGE_FLAGS_WRITE_THROUGH
+    )
+  );
 }

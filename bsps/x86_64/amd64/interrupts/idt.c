@@ -88,7 +88,9 @@ void lidt(struct idt_record *ptr)
   __asm__ volatile ("lidt %0" :: "m"(*ptr));
 }
 
-interrupt_descriptor amd64_create_interrupt_descriptor(uintptr_t handler, uint8_t types_and_attributes)
+interrupt_descriptor amd64_create_interrupt_descriptor(
+  uintptr_t handler, uint8_t types_and_attributes
+)
 {
   interrupt_descriptor entry = {
     .offset_0 = handler & 0xffff,
@@ -105,11 +107,14 @@ interrupt_descriptor amd64_create_interrupt_descriptor(uintptr_t handler, uint8_
 uintptr_t amd64_get_handler_from_idt(uint32_t vector)
 {
   interrupt_descriptor entry = amd64_idt[vector];
-  uintptr_t handler = entry.offset_0 | (entry.offset_1 << 16) | ((uint64_t) entry.offset_2 << 32);
+  uintptr_t handler = entry.offset_0 | (entry.offset_1 << 16) |
+    ((uint64_t) entry.offset_2 << 32);
   return handler;
 }
 
-void amd64_install_raw_interrupt(uint32_t vector, uintptr_t new_handler, uintptr_t *old_handler)
+void amd64_install_raw_interrupt(
+  uint32_t vector, uintptr_t new_handler, uintptr_t *old_handler
+)
 {
   *old_handler = amd64_get_handler_from_idt(vector);
   interrupt_descriptor new_desc = amd64_create_interrupt_descriptor(

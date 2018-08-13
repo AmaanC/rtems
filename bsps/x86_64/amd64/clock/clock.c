@@ -38,7 +38,7 @@
 #include <rtems/score/x86_64.h>
 #include <bsp/irq-generic.h>
 
-/* Use the amd64_apic_base as a pointer into an array of 32-bit APIC registers */
+/* Use the amd64_apic_base as an array of 32-bit APIC registers */
 volatile uint32_t *amd64_apic_base;
 static struct timecounter amd64_clock_tc;
 
@@ -115,7 +115,8 @@ void apic_initialize(void)
     (uintptr_t) apic_spurious_handler,
     &old
   );
-  amd64_apic_base[APIC_REGISTER_SPURIOUS] = APIC_SPURIOUS_ENABLE | BSP_VECTOR_SPURIOUS;
+  amd64_apic_base[APIC_REGISTER_SPURIOUS] =
+    APIC_SPURIOUS_ENABLE | BSP_VECTOR_SPURIOUS;
 
   DBG_PRINTF(
     "APIC spurious vector register *0x%" PRIxPTR "=0x%" PRIx32 "\n",
@@ -156,7 +157,8 @@ uint32_t apic_timer_calibrate(void)
   amd64_apic_base[APIC_REGISTER_TIMER_DIV] = APIC_TIMER_SELECT_DIVIDER;
 
   /* Enable the channel 2 timer gate and disable the speaker output */
-  uint8_t chan2_value = (inport_byte(PIT_PORT_CHAN2_GATE) | PIT_CHAN2_TIMER_BIT) & ~PIT_CHAN2_SPEAKER_BIT;
+  uint8_t chan2_value = (inport_byte(PIT_PORT_CHAN2_GATE) | PIT_CHAN2_TIMER_BIT)
+    & ~PIT_CHAN2_SPEAKER_BIT;
   outport_byte(PIT_PORT_CHAN2_GATE, chan2_value);
 
   /* Initialize PIT in one-shot mode on Channel 2 */
@@ -225,7 +227,8 @@ uint32_t apic_timer_calibrate(void)
 
   /* Confirm that the APIC timer never hit 0 and IRQ'd during calibration */
   assert(Clock_driver_ticks == 0);
-  assert(apic_ticks_per_sec != 0 && apic_ticks_per_sec != apic_calibrate_init_count);
+  assert(apic_ticks_per_sec != 0 &&
+         apic_ticks_per_sec != apic_calibrate_init_count);
 
   DBG_PRINTF(
     "CPU frequency: 0x%" PRIu64 "\nAPIC ticks/sec: 0x%" PRIu32 "\n",

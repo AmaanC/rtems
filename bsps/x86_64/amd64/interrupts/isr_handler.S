@@ -44,9 +44,9 @@ SYM(apic_spurious_handler):
   iretq
 
 /*
- * These are callee-saved registers, which means we can use them in our interrupts
- * as persistent scratch registers (i.e. calls will not destroy them), as long
- * as we also save and restore it for the interrupted task.
+ * These are callee-saved registers, which means we can use them in our
+ * interrupts as persistent scratch registers (i.e. calls will not destroy
+ * them), as long as we also save and restore it for the interrupted task.
  */
 .set SCRATCH_REG0, rbp
 .set SCRATCH_REG1, rbx
@@ -150,7 +150,7 @@ SYM(_ISR_Handler):
   call amd64_dispatch_isr
 
 .restore_stack:
-  /* Restore stack; if this is the outermost stack, we're going back to the task stack */
+  /* If this is the outermost stack, this restores the task stack */
   movq SAVED_RSP, rsp
 
   decq PER_CPU_ISR_NEST_LEVEL(Per_CPU_Info)

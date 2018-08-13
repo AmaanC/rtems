@@ -59,7 +59,11 @@ void _CPU_ISR_install_raw_handler(
   proc_ptr   *old_handler
 )
 {
-  amd64_install_raw_interrupt(vector, (uintptr_t) new_handler, (uintptr_t*) old_handler);
+  amd64_install_raw_interrupt(
+    vector,
+    (uintptr_t) new_handler,
+    (uintptr_t*) old_handler
+  );
 }
 
 void _CPU_ISR_install_vector(

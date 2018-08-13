@@ -70,7 +70,10 @@ RTEMS_STATIC_ASSERT(
 #define PIT_PORT_CHAN0              0x40
 #define PIT_PORT_CHAN1              0x41
 #define PIT_PORT_CHAN2              0x42
-/* The input to channel 2 can be gated through software, using bit 0 of port 0x61 */
+/*
+ * The input to channel 2 can be gated through software, using bit 0 of port
+ * 0x61.
+ */
 #define PIT_PORT_CHAN2_GATE         0x61
 #define PIT_CHAN2_TIMER_BIT         1
 #define PIT_CHAN2_SPEAKER_BIT       2
