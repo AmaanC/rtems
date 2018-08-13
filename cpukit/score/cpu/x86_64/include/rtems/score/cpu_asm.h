@@ -31,7 +31,7 @@
 
 #include <rtems/score/basedefs.h>
 
-static inline uint8_t inport_byte(uint16_t port)
+RTEMS_INLINE_ROUTINE uint8_t inport_byte(uint16_t port)
 {
   uint8_t ret;
   __asm__ volatile ( "inb %1, %0"
@@ -40,12 +40,12 @@ static inline uint8_t inport_byte(uint16_t port)
   return ret;
 }
 
-static inline void outport_byte(uint16_t port, uint8_t val)
+RTEMS_INLINE_ROUTINE void outport_byte(uint16_t port, uint8_t val)
 {
   __asm__ volatile ( "outb %0, %1" : : "a" (val), "Nd" (port) );
 }
 
-static inline uint16_t amd64_get_cs(void)
+RTEMS_INLINE_ROUTINE uint16_t amd64_get_cs(void)
 {
   uint16_t segment = 0;
 
@@ -54,12 +54,12 @@ static inline uint16_t amd64_get_cs(void)
   return segment;
 }
 
-static inline void amd64_set_cr3(uint64_t segment)
+RTEMS_INLINE_ROUTINE void amd64_set_cr3(uint64_t segment)
 {
   __asm__ volatile ( "movq %0, %%cr3" : "=r" (segment) : "0" (segment) );
 }
 
-static inline void cpuid(
+RTEMS_INLINE_ROUTINE void cpuid(
   uint32_t code, uint32_t *eax, uint32_t *ebx, uint32_t *ecx, uint32_t *edx
 ) {
   __asm__ volatile ( "cpuid"
@@ -67,7 +67,7 @@ static inline void cpuid(
                      : "a" (code) );
 }
 
-static inline uint64_t rdmsr(uint32_t msr)
+RTEMS_INLINE_ROUTINE uint64_t rdmsr(uint32_t msr)
 {
   uint32_t low, high;
   __asm__ volatile ( "rdmsr" :
@@ -76,23 +76,23 @@ static inline uint64_t rdmsr(uint32_t msr)
    return low | (uint64_t) high << 32;
 }
 
-static inline void wrmsr(uint32_t msr, uint32_t low, uint32_t high)
+RTEMS_INLINE_ROUTINE void wrmsr(uint32_t msr, uint32_t low, uint32_t high)
 {
   __asm__ volatile ( "wrmsr" : :
                      "a" (low), "d" (high), "c" (msr) );
 }
 
-static inline void amd64_enable_interrupts(void)
+RTEMS_INLINE_ROUTINE void amd64_enable_interrupts(void)
 {
   __asm__ volatile ( "sti" );
 }
 
-static inline void amd64_disable_interrupts(void)
+RTEMS_INLINE_ROUTINE void amd64_disable_interrupts(void)
 {
   __asm__ volatile ( "cli" );
 }
 
-static inline void stub_io_wait(void)
+RTEMS_INLINE_ROUTINE void stub_io_wait(void)
 {
   /* XXX: This likely won't be required on any modern boards, but this function
    * exists so it's easier to find all the places it may be used.
