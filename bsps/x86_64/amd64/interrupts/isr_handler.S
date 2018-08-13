@@ -99,19 +99,7 @@ DISTINCT_INTERRUPT_ENTRY(30)
 DISTINCT_INTERRUPT_ENTRY(31)
 DISTINCT_INTERRUPT_ENTRY(32)
 
-#if DEBUG
-#define CHECK_RSP() \
-  push rdi                      ; \
-  movq rsp, rdi                 ; \
-  call SYM(xxx_print_rsp)       ; \
-  popq rdi
-#else
-#define CHECK_RSP()
-#endif
-
 SYM(_ISR_Handler):
-  CHECK_RSP()
-
 .save_cpu_interrupt_frame:
 .set SAVED_RSP, SCRATCH_REG0
   movq rsp, SAVED_RSP
@@ -138,9 +126,7 @@ SYM(_ISR_Handler):
 
 .switch_stack_if_needed:
   /* Save current aligned rsp so we can find CPU_Interrupt_frame again later */
-  CHECK_RSP()
   movq rsp, SAVED_RSP
-  CHECK_RSP()
 
   /*
    * Switch to interrupt stack if necessary; it's necessary if this is the
@@ -162,23 +148,11 @@ SYM(_ISR_Handler):
 
 .call_isr_dispatch:
   /* REG_ARG0 already includes the vector number, so we can simply call */
-  CHECK_RSP()
   call amd64_dispatch_isr
-  CHECK_RSP()
 
 .restore_stack:
   /* Restore stack; if this is the outermost stack, we're going back to the task stack */
   movq SAVED_RSP, rsp
-  CHECK_RSP()
-
-#if DEBUG
-.check_rsp_0:
-  cmpq $0, rsp
-  jne  .assert_pass
-.assert_fail:
-  jmp  .assert_fail
-.assert_pass:
-#endif
 
   decq PER_CPU_ISR_NEST_LEVEL(Per_CPU_Info)
   decq PER_CPU_THREAD_DISPATCH_DISABLE_LEVEL(Per_CPU_Info)
@@ -205,10 +179,8 @@ SYM(_ISR_Handler):
 
   /* Restore the rsp value from just before _ISR_Handler was called */
   movq (0 * CPU_SIZEOF_POINTER)(rsp), SAVED_RSP
-
   movq SAVED_RSP, rsp
 
-  CHECK_RSP()
   /* Restore args DISTINCT_INTERRUPT_ENTRY pushed to task stack */
   popq SCRATCH_REG1
   popq SCRATCH_REG0
