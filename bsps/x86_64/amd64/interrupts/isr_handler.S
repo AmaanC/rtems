@@ -108,7 +108,6 @@ SYM(_ISR_Handler):
   subq $CPU_INTERRUPT_FRAME_SIZE, rsp
 .set ALIGNMENT_MASK, ~(CPU_STACK_ALIGNMENT - 1)
   andq $ALIGNMENT_MASK, rsp
-  CHECK_RSP()
   // XXX: Save interrupt mask?
 
   /* Save caller-saved registers to CPU_Interrupt_frame */
@@ -156,7 +155,7 @@ SYM(_ISR_Handler):
 
   decq PER_CPU_ISR_NEST_LEVEL(Per_CPU_Info)
   decq PER_CPU_THREAD_DISPATCH_DISABLE_LEVEL(Per_CPU_Info)
-  /* XXX: Possible bug in QEMU causing ZF to not be set by decq? */
+  /* XXX: Bug in QEMU causing ZF to not be set by decq necessitating the cmpb */
   cmpb $0, PER_CPU_THREAD_DISPATCH_DISABLE_LEVEL(Per_CPU_Info)
   /* If dispatch is non-zero, it is disabled, so skip scheduling it */
   jne  .restore_cpu_interrupt_frame
