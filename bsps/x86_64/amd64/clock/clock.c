@@ -71,7 +71,7 @@ bool has_apic_support()
 void apic_initialize(void)
 {
   if ( !has_apic_support() ) {
-    printf("cpuid claims no APIC support; trying anyway.\n");
+    printf("warning: cpuid claims no APIC support - trying anyway.\n");
   }
 
   /*
@@ -93,10 +93,18 @@ void apic_initialize(void)
     apic_base_msr >> 32
   );
 
-  DBG_PRINTF("APIC is at %x\n", (uintptr_t) amd64_apic_base);
-  DBG_PRINTF("APIC ID at *%x=%x\n", &amd64_apic_base[APIC_REGISTER_APICID], amd64_apic_base[APIC_REGISTER_APICID]);
+  DBG_PRINTF("APIC is at 0x%" PRIxPTR "\n", (uintptr_t) amd64_apic_base);
+  DBG_PRINTF(
+    "APIC ID at *0x%" PRIxPTR "=0x%" PRIx32 "\n",
+    (uintptr_t) &amd64_apic_base[APIC_REGISTER_APICID],
+    amd64_apic_base[APIC_REGISTER_APICID]
+  );
 
-  DBG_PRINTF("APIC spurious vector register *%x=%x\n", &amd64_apic_base[APIC_REGISTER_SPURIOUS], amd64_apic_base[APIC_REGISTER_SPURIOUS]);
+  DBG_PRINTF(
+    "APIC spurious vector register *0x%" PRIxPTR "=0x%" PRIx32 "\n",
+    (uintptr_t) &amd64_apic_base[APIC_REGISTER_SPURIOUS],
+    amd64_apic_base[APIC_REGISTER_SPURIOUS]
+  );
 
   /*
    * Software enable the APIC by mapping spurious vector and setting enable bit.
@@ -109,7 +117,11 @@ void apic_initialize(void)
   );
   amd64_apic_base[APIC_REGISTER_SPURIOUS] = APIC_SPURIOUS_ENABLE | BSP_VECTOR_SPURIOUS;
 
-  DBG_PRINTF("APIC spurious vector register *%x=%x\n", &amd64_apic_base[APIC_REGISTER_SPURIOUS], amd64_apic_base[APIC_REGISTER_SPURIOUS]);
+  DBG_PRINTF(
+    "APIC spurious vector register *0x%" PRIxPTR "=0x%" PRIx32 "\n",
+    (uintptr_t) &amd64_apic_base[APIC_REGISTER_SPURIOUS],
+    amd64_apic_base[APIC_REGISTER_SPURIOUS]
+  );
 
   /*
    * The PIC may send spurious IRQs even when disabled, and without remapping
@@ -191,7 +203,7 @@ uint32_t apic_timer_calibrate(void)
   }
   uint32_t apic_currcnt = amd64_apic_base[APIC_REGISTER_TIMER_CURRCNT];
 
-  DBG_PRINTF("PIT stopped at 0x%x\n", pit_ticks);
+  DBG_PRINTF("PIT stopped at 0x%" PRIx32 "\n", pit_ticks);
 
   /* Stop APIC timer to calculate ticks to time ratio */
   amd64_apic_base[APIC_REGISTER_LVT_TIMER] = APIC_DISABLE;
@@ -199,7 +211,11 @@ uint32_t apic_timer_calibrate(void)
   /* Get counts passed since we started counting */
   uint32_t apic_ticks_per_sec = apic_calibrate_init_count - apic_currcnt;
 
-  DBG_PRINTF("APIC ticks passed in 1/%d of a second: 0x%x\n", PIT_CALIBRATE_DIVIDER, apic_ticks_per_sec);
+  DBG_PRINTF(
+    "APIC ticks passed in 1/%d of a second: 0x%" PRIx32 "\n",
+    PIT_CALIBRATE_DIVIDER,
+    apic_ticks_per_sec
+  );
 
   /* We ran the PIT for a fraction of a second */
   apic_ticks_per_sec = apic_ticks_per_sec * PIT_CALIBRATE_DIVIDER;
@@ -212,7 +228,7 @@ uint32_t apic_timer_calibrate(void)
   assert(apic_ticks_per_sec != 0 && apic_ticks_per_sec != apic_calibrate_init_count);
 
   DBG_PRINTF(
-    "CPU frequency: 0x%llx\nAPIC ticks/sec: 0x%llx\n",
+    "CPU frequency: 0x%" PRIu64 "\nAPIC ticks/sec: 0x%" PRIu32 "\n",
     /* Multiply to undo effects of divider */
     (uint64_t) apic_ticks_per_sec * APIC_TIMER_DIVIDE_VALUE,
     apic_ticks_per_sec
@@ -253,7 +269,11 @@ void amd64_clock_driver_initialize(void)
 {
   uint64_t us_per_tick = rtems_configuration_get_microseconds_per_tick();
   uint64_t irq_ticks_per_sec = 1000000 / us_per_tick;
-  DBG_PRINTF("us_per_tick = %d\nDesired frequency = %d irqs/sec\n", us_per_tick, irq_ticks_per_sec);
+  DBG_PRINTF(
+    "us_per_tick = %d\nDesired frequency = %d irqs/sec\n",
+    us_per_tick,
+    irq_ticks_per_sec
+  );
 
   /* Setup and enable the APIC itself */
   apic_initialize();
