@@ -1,15 +1,6 @@
-/**
- *  @file
- *
- *  @brief x86_64 Dependent Source
- */
-
 /*
  * Copyright (c) 2018.
  * Amaan Cheval <amaan.cheval@gmail.com>
- *
- * Copyright (c) 1989-1999.
- * On-Line Applications Research Corporation (OAR).
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,48 +24,53 @@
  * SUCH DAMAGE.
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <stdint.h>
+#include <rtems.h>
+#include <rtems/score/basedefs.h>
+#include <rtems/score/x86_64.h>
+#include <rtems/score/cpuimpl.h>
+#include <bsp/irq-generic.h>
+#include <pic.h>
 
-#include <rtems/system.h>
-#include <rtems/score/idt.h>
-#include <rtems/score/isr.h>
-#include <rtems/score/wkspace.h>
-#include <rtems/score/tls.h>
-
-Context_Control_fp _CPU_Null_fp_context;
-
-void _CPU_Exception_frame_print(const CPU_Exception_frame *ctx)
+void pic_remap(uint8_t offset1, uint8_t offset2)
 {
+  uint8_t a1, a2;
+
+  /* save masks */
+  a1 = inport_byte(PIC1_DATA);
+  a2 = inport_byte(PIC2_DATA);
+
+  /* start the initialization sequence in cascade mode */
+  outport_byte(PIC1_COMMAND, PIC_ICW1_INIT | PIC_ICW1_ICW4);
+  stub_io_wait();
+  outport_byte(PIC2_COMMAND, PIC_ICW1_INIT | PIC_ICW1_ICW4);
+  stub_io_wait();
+  /* ICW2: Master PIC vector offset */
+  outport_byte(PIC1_DATA, offset1);
+  stub_io_wait();
+  /* ICW2: Slave PIC vector offset */
+  outport_byte(PIC2_DATA, offset2);
+  stub_io_wait();
+  /* ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100) */
+  outport_byte(PIC1_DATA, 4);
+  stub_io_wait();
+  /* ICW3: tell Slave PIC its cascade identity (0000 0010) */
+  outport_byte(PIC2_DATA, 2);
+  stub_io_wait();
+
+  outport_byte(PIC1_DATA, PIC_ICW4_8086);
+  stub_io_wait();
+  outport_byte(PIC2_DATA, PIC_ICW4_8086);
+  stub_io_wait();
+
+  /* restore saved masks. */
+  outport_byte(PIC1_DATA, a1);
+  outport_byte(PIC2_DATA, a2);
 }
 
-void _CPU_Initialize(void)
+void pic_disable(void)
 {
-}
-
-void _CPU_ISR_install_raw_handler(
-  uint32_t    vector,
-  proc_ptr    new_handler,
-  proc_ptr   *old_handler
-)
-{
-  amd64_install_raw_interrupt(
-    vector,
-    (uintptr_t) new_handler,
-    (uintptr_t*) old_handler
-  );
-}
-
-void _CPU_ISR_install_vector(
-  uint32_t    vector,
-  proc_ptr    new_handler,
-  proc_ptr   *old_handler
-)
-{
-}
-
-void *_CPU_Thread_Idle_body(uintptr_t ignored)
-{
-  for ( ; ; ) { }
+  /* Mask all lines on both master and slave PIC to disable */
+  outport_byte(PIC1_DATA, 0xff);
+  outport_byte(PIC2_DATA, 0xff);
 }

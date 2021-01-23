@@ -1,15 +1,11 @@
-/**
- *  @file
- *
- *  @brief x86_64 Dependent Source
+/*
+ * This file contains the mandatory defines to support the irq.h and
+ * irq-generic.c interfaces (initialized finally with bsp_interrupt_initialize).
  */
 
 /*
  * Copyright (c) 2018.
  * Amaan Cheval <amaan.cheval@gmail.com>
- *
- * Copyright (c) 1989-1999.
- * On-Line Applications Research Corporation (OAR).
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,48 +29,18 @@
  * SUCH DAMAGE.
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ifndef LIBBSP_GENERIC_AMD64_IRQ_H
+#define LIBBSP_GENERIC_AMD64_IRQ_H
 
-#include <rtems/system.h>
-#include <rtems/score/idt.h>
-#include <rtems/score/isr.h>
-#include <rtems/score/wkspace.h>
-#include <rtems/score/tls.h>
+#ifndef ASM
 
-Context_Control_fp _CPU_Null_fp_context;
+#include <rtems.h>
+#include <rtems/irq.h>
+#include <rtems/irq-extension.h>
 
-void _CPU_Exception_frame_print(const CPU_Exception_frame *ctx)
-{
-}
+#define BSP_INTERRUPT_VECTOR_MIN  0x0
+#define BSP_IRQ_VECTOR_NUMBER     34
+#define BSP_INTERRUPT_VECTOR_MAX  BSP_IRQ_VECTOR_NUMBER
 
-void _CPU_Initialize(void)
-{
-}
-
-void _CPU_ISR_install_raw_handler(
-  uint32_t    vector,
-  proc_ptr    new_handler,
-  proc_ptr   *old_handler
-)
-{
-  amd64_install_raw_interrupt(
-    vector,
-    (uintptr_t) new_handler,
-    (uintptr_t*) old_handler
-  );
-}
-
-void _CPU_ISR_install_vector(
-  uint32_t    vector,
-  proc_ptr    new_handler,
-  proc_ptr   *old_handler
-)
-{
-}
-
-void *_CPU_Thread_Idle_body(uintptr_t ignored)
-{
-  for ( ; ; ) { }
-}
+#endif /* !ASM */
+#endif /* LIBBSP_GENERIC_RISCV_IRQ_H */

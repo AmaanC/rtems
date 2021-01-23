@@ -1,15 +1,6 @@
-/**
- *  @file
- *
- *  @brief x86_64 Dependent Source
- */
-
 /*
  * Copyright (c) 2018.
  * Amaan Cheval <amaan.cheval@gmail.com>
- *
- * Copyright (c) 1989-1999.
- * On-Line Applications Research Corporation (OAR).
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,48 +24,45 @@
  * SUCH DAMAGE.
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
+#ifndef _LIBCPU_AMD64_PAGE_H
+#define _LIBCPU_AMD64_PAGE_H
+
+#ifndef ASM
+
+#define NUM_PAGE_TABLE_ENTRIES 512
+
+extern uint64_t amd64_pml4[NUM_PAGE_TABLE_ENTRIES];
+extern uint64_t amd64_pdpt[NUM_PAGE_TABLE_ENTRIES];
+
+bool paging_1gib_pages_supported(void);
+uint8_t get_maxphysaddr(void);
+uint64_t get_mask_for_bits(uint8_t start, uint8_t end);
+uint64_t create_cr3_entry(
+  uint64_t phys_addr, uint8_t maxphysaddr, uint64_t flags
+);
+uint64_t create_pml4_entry(
+  uint64_t phys_addr, uint8_t maxphysaddr, uint64_t flags
+);
+uint64_t create_pdpt_entry(
+  uint64_t phys_addr, uint8_t maxphysaddr, uint64_t flags
+);
+
+void paging_init(void);
+
+#define PAGE_FLAGS_PRESENT          (1 << 0)
+#define PAGE_FLAGS_WRITABLE         (1 << 1)
+#define PAGE_FLAGS_USER_ACCESSIBLE  (1 << 2)
+#define PAGE_FLAGS_WRITE_THROUGH    (1 << 3)
+#define PAGE_FLAGS_NO_CACHE         (1 << 4)
+#define PAGE_FLAGS_ACCESSED         (1 << 5)
+#define PAGE_FLAGS_DIRTY            (1 << 6)
+#define PAGE_FLAGS_HUGE_PAGE        (1 << 7)
+#define PAGE_FLAGS_GLOBAL           (1 << 8)
+#define PAGE_FLAGS_NO_EXECUTE       (1 << 63)
+
+#define PAGE_FLAGS_DEFAULTS                                              \
+  (PAGE_FLAGS_PRESENT | PAGE_FLAGS_WRITABLE | PAGE_FLAGS_USER_ACCESSIBLE \
+   | PAGE_FLAGS_WRITE_THROUGH | PAGE_FLAGS_NO_CACHE | PAGE_FLAGS_GLOBAL)
+
+#endif /* !ASM */
 #endif
-
-#include <rtems/system.h>
-#include <rtems/score/idt.h>
-#include <rtems/score/isr.h>
-#include <rtems/score/wkspace.h>
-#include <rtems/score/tls.h>
-
-Context_Control_fp _CPU_Null_fp_context;
-
-void _CPU_Exception_frame_print(const CPU_Exception_frame *ctx)
-{
-}
-
-void _CPU_Initialize(void)
-{
-}
-
-void _CPU_ISR_install_raw_handler(
-  uint32_t    vector,
-  proc_ptr    new_handler,
-  proc_ptr   *old_handler
-)
-{
-  amd64_install_raw_interrupt(
-    vector,
-    (uintptr_t) new_handler,
-    (uintptr_t*) old_handler
-  );
-}
-
-void _CPU_ISR_install_vector(
-  uint32_t    vector,
-  proc_ptr    new_handler,
-  proc_ptr   *old_handler
-)
-{
-}
-
-void *_CPU_Thread_Idle_body(uintptr_t ignored)
-{
-  for ( ; ; ) { }
-}

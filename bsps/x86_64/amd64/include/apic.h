@@ -1,15 +1,6 @@
-/**
- *  @file
- *
- *  @brief x86_64 Dependent Source
- */
-
 /*
  * Copyright (c) 2018.
  * Amaan Cheval <amaan.cheval@gmail.com>
- *
- * Copyright (c) 1989-1999.
- * On-Line Applications Research Corporation (OAR).
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,48 +24,39 @@
  * SUCH DAMAGE.
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
+#ifndef _AMD64_APIC_H
+#define _AMD64_APIC_H
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#include <rtems/system.h>
-#include <rtems/score/idt.h>
-#include <rtems/score/isr.h>
-#include <rtems/score/wkspace.h>
-#include <rtems/score/tls.h>
+/* The address of the MSR pointing to the APIC base physical address */
+#define APIC_BASE_MSR             0x1B
+/* Value to hardware-enable the APIC through the APIC_BASE_MSR */
+#define APIC_BASE_MSR_ENABLE      0x800
 
-Context_Control_fp _CPU_Null_fp_context;
+/*
+ * Since amd64_apic_base is an array of 32-bit elements, these byte-offsets
+ * need to be divided by 4 to index the array.
+ */
+#define APIC_OFFSET(val) (val >> 2)
 
-void _CPU_Exception_frame_print(const CPU_Exception_frame *ctx)
-{
+#define APIC_REGISTER_APICID        APIC_OFFSET(0x20)
+#define APIC_REGISTER_EOI           APIC_OFFSET(0x0B0)
+#define APIC_REGISTER_SPURIOUS      APIC_OFFSET(0x0F0)
+#define APIC_REGISTER_LVT_TIMER     APIC_OFFSET(0x320)
+#define APIC_REGISTER_TIMER_INITCNT APIC_OFFSET(0x380)
+#define APIC_REGISTER_TIMER_CURRCNT APIC_OFFSET(0x390)
+#define APIC_REGISTER_TIMER_DIV     APIC_OFFSET(0x3E0)
+
+#define APIC_DISABLE                0x10000
+#define APIC_EOI_ACK                0
+#define APIC_SELECT_TMR_PERIODIC    0x20000
+#define APIC_SPURIOUS_ENABLE        0x100
+
+#ifdef __cplusplus
 }
+#endif
 
-void _CPU_Initialize(void)
-{
-}
-
-void _CPU_ISR_install_raw_handler(
-  uint32_t    vector,
-  proc_ptr    new_handler,
-  proc_ptr   *old_handler
-)
-{
-  amd64_install_raw_interrupt(
-    vector,
-    (uintptr_t) new_handler,
-    (uintptr_t*) old_handler
-  );
-}
-
-void _CPU_ISR_install_vector(
-  uint32_t    vector,
-  proc_ptr    new_handler,
-  proc_ptr   *old_handler
-)
-{
-}
-
-void *_CPU_Thread_Idle_body(uintptr_t ignored)
-{
-  for ( ; ; ) { }
-}
+#endif /* _AMD64_APIC_H */

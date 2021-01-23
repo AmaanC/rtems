@@ -32,10 +32,19 @@ extern "C" {
 #endif
 
 #define CPU_NAME "x86-64"
-#define CPU_MODEL_NAME "XXX: x86-64 generic"
+#define CPU_MODEL_NAME "amd64"
 
-#define COM1_BASE_IO 0x3F8
+#define COM1_BASE_IO    0x3F8
 #define COM1_CLOCK_RATE (115200 * 16)
+
+#define EFLAGS_INTR_ENABLE 0x200
+
+#if DEBUG
+#define DBG_PRINTF(format, args...)             \
+  printf(format, ## args)
+#else
+#define DBG_PRINTF(format, args...)
+#endif
 
 #ifdef __cplusplus
 }
